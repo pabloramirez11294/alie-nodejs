@@ -2,6 +2,7 @@ import {Request,Response, response} from 'express';
 import oracledb from 'oracledb';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
 
 
 const conexion= {
@@ -11,10 +12,11 @@ const conexion= {
 };
 class RegisterController{
     SECRET_KEY:string ='alie-sell';
-    
+
+     
 
     async run(req:Request,res:Response) {
-      
+        
         let connection;
       
         try {
@@ -41,8 +43,7 @@ class RegisterController{
         }
       }
       
-
-
+    
     public async create(req: Request, res: Response) {
       let connection;
       var salt = bcrypt.genSaltSync(10);
@@ -86,6 +87,56 @@ class RegisterController{
           correo:req.body.correo,
           accessToken:accessToken
         }
+
+        //**********************CORREO ``
+        const link=`http://localhost:3000/register/confirmar/${accessToken}`;
+        const TXTUSER='kvothe.11294@gmail.com';
+        const TXTCLAVE='kVothe11294@';
+        
+        let transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+              user: TXTUSER,
+              pass: TXTCLAVE
+          }
+        });
+        let mail_options = {
+          from: TXTUSER,
+          to: dataU.correo,
+          subject: `Bienvenido `,
+          html: `
+              <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#2d3436" bgcolor="#2d3436">
+              <tr height="200px">  
+                  <td bgcolor="" width="600px">
+                      <h1 style="color: #fff; text-align:center">Bienvenido a Alie Sell</h1>
+                      <p  style="color: #fff; text-align:center">
+                          <span style="color: #e84393">${req.body.nombre}</span> 
+                          a la aplicación
+                      </p>
+                  </td>
+              </tr>
+              <tr bgcolor="#fff">
+                  <td style="text-align:center">
+                      <p style="color: #000">Para confirmar su cuenta selecciones el siguiente enlace: ${link}</p>
+                  </td>
+              </tr>
+              </table>
+          
+          `
+          };
+          transporter.sendMail(mail_options, (error, info) => {
+            if (error) {
+                console.log(error);
+                res.status(409).send({ message: 'Error al mandar el correo.' });
+            } else {
+                console.log('El correo se envío correctamente ' + info.response);
+            }
+          });
+
+
+
+        //*********************************TERMINA CORREO */
+          
 
       res.status(200).send({dataU});
 
@@ -214,7 +265,7 @@ class RegisterController{
           console.log(result);
           await connection.execute('commit');
                 
-            res.status(200).send({ message: 'Confirmación de correo exitoso.' });
+            res.status(200).redirect('http://localhost:4200/login');
         }
         
         
@@ -226,7 +277,7 @@ class RegisterController{
       } finally {
         if (connection) {
           try {
-            await connection.close();
+            await connection.close();            
             //res.send("cerrar conexion");
           } catch (err) {
             console.error(err);
@@ -236,6 +287,53 @@ class RegisterController{
       }
     }
 
+   /*  enviarCorreo(req:Request,res:Response){
+      const TXTUSER='kvothe.11294@gmail.com';
+      const TXTCLAVE='kVothe11294@';
+      
+      console.log(TXTUSER);
+      const correo='pabloramirez.11294@gmail.com';
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: TXTUSER,
+            pass: TXTCLAVE
+        }
+      });
+      let mail_options = {
+        from: TXTUSER,
+        to: correo,
+        subject: `Bienvenido `,
+        html: `
+            <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#2d3436" bgcolor="#2d3436">
+            <tr height="200px">  
+                <td bgcolor="" width="600px">
+                    <h1 style="color: #fff; text-align:center">Bienvenido a Alie Sell</h1>
+                    <p  style="color: #fff; text-align:center">
+                        <span style="color: #e84393">${TXTUSER}</span> 
+                        a la aplicación
+                    </p>
+                </td>
+            </tr>
+            <tr bgcolor="#fff">
+                <td style="text-align:center">
+                    <p style="color: #000">Para confirmar su cuenta selecciones el siguiente enlace.</p>
+                </td>
+            </tr>
+            </table>
+        
+        `
+        };
+        transporter.sendMail(mail_options, (error, info) => {
+          if (error) {
+              console.log(error);
+          } else {
+              console.log('El correo se envío correctamente ' + info.response);
+          }
+        });
+        res.status(200).send('enviado');
+
+    } */
 
 }
 

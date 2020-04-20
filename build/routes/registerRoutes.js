@@ -12,6 +12,7 @@ var RegisterRoutes = /** @class */ (function () {
         this.router.post('/crear', registerController_1.registerController.create);
         this.router.post('/login', registerController_1.registerController.loginUser);
         this.router.get('/confirmar/:id', registerController_1.registerController.confirmarCorreo);
+        //this.router.get('/enviar', registerController.enviarCorreo);
     };
     return RegisterRoutes;
 }());

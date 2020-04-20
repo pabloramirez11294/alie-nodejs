@@ -42,6 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var oracledb_1 = __importDefault(require("oracledb"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var bcryptjs_1 = __importDefault(require("bcryptjs"));
+var nodemailer_1 = __importDefault(require("nodemailer"));
 var conexion = {
     user: "alie",
     password: "alie",
@@ -50,6 +51,53 @@ var conexion = {
 var RegisterController = /** @class */ (function () {
     function RegisterController() {
         this.SECRET_KEY = 'alie-sell';
+        /*  enviarCorreo(req:Request,res:Response){
+           const TXTUSER='kvothe.11294@gmail.com';
+           const TXTCLAVE='kVothe11294@';
+           
+           console.log(TXTUSER);
+           const correo='pabloramirez.11294@gmail.com';
+           let transporter = nodemailer.createTransport({
+             service: 'gmail',
+             auth: {
+                 user: TXTUSER,
+                 pass: TXTCLAVE
+             }
+           });
+           let mail_options = {
+             from: TXTUSER,
+             to: correo,
+             subject: `Bienvenido `,
+             html: `
+                 <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#2d3436" bgcolor="#2d3436">
+                 <tr height="200px">
+                     <td bgcolor="" width="600px">
+                         <h1 style="color: #fff; text-align:center">Bienvenido a Alie Sell</h1>
+                         <p  style="color: #fff; text-align:center">
+                             <span style="color: #e84393">${TXTUSER}</span>
+                             a la aplicación
+                         </p>
+                     </td>
+                 </tr>
+                 <tr bgcolor="#fff">
+                     <td style="text-align:center">
+                         <p style="color: #000">Para confirmar su cuenta selecciones el siguiente enlace.</p>
+                     </td>
+                 </tr>
+                 </table>
+             
+             `
+             };
+             transporter.sendMail(mail_options, (error, info) => {
+               if (error) {
+                   console.log(error);
+               } else {
+                   console.log('El correo se envío correctamente ' + info.response);
+               }
+             });
+             res.status(200).send('enviado');
+     
+         } */
     }
     RegisterController.prototype.run = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
@@ -95,7 +143,7 @@ var RegisterController = /** @class */ (function () {
     };
     RegisterController.prototype.create = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, salt, hash, result, txt, txt2, _id, expiresIn, accessToken, dataU, err_3, err_4;
+            var connection, salt, hash, result, txt, txt2, _id, expiresIn, accessToken, dataU, link, TXTUSER, TXTCLAVE, transporter, mail_options, err_3, err_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -135,6 +183,32 @@ var RegisterController = /** @class */ (function () {
                             correo: req.body.correo,
                             accessToken: accessToken
                         };
+                        link = "http://localhost:3000/register/confirmar/" + accessToken;
+                        TXTUSER = 'kvothe.11294@gmail.com';
+                        TXTCLAVE = 'kVothe11294@';
+                        transporter = nodemailer_1.default.createTransport({
+                            service: 'gmail',
+                            auth: {
+                                user: TXTUSER,
+                                pass: TXTCLAVE
+                            }
+                        });
+                        mail_options = {
+                            from: TXTUSER,
+                            to: dataU.correo,
+                            subject: "Bienvenido ",
+                            html: "\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600px\" background-color=\"#2d3436\" bgcolor=\"#2d3436\">\n              <tr height=\"200px\">  \n                  <td bgcolor=\"\" width=\"600px\">\n                      <h1 style=\"color: #fff; text-align:center\">Bienvenido a Alie Sell</h1>\n                      <p  style=\"color: #fff; text-align:center\">\n                          <span style=\"color: #e84393\">" + req.body.nombre + "</span> \n                          a la aplicaci\u00F3n\n                      </p>\n                  </td>\n              </tr>\n              <tr bgcolor=\"#fff\">\n                  <td style=\"text-align:center\">\n                      <p style=\"color: #000\">Para confirmar su cuenta selecciones el siguiente enlace: " + link + "</p>\n                  </td>\n              </tr>\n              </table>\n          \n          "
+                        };
+                        transporter.sendMail(mail_options, function (error, info) {
+                            if (error) {
+                                console.log(error);
+                                res.status(409).send({ message: 'Error al mandar el correo.' });
+                            }
+                            else {
+                                console.log('El correo se envío correctamente ' + info.response);
+                            }
+                        });
+                        //*********************************TERMINA CORREO */
                         res.status(200).send({ dataU: dataU });
                         return [3 /*break*/, 12];
                     case 6:
@@ -271,7 +345,7 @@ var RegisterController = /** @class */ (function () {
                         return [4 /*yield*/, connection.execute('commit')];
                     case 6:
                         _a.sent();
-                        res.status(200).send({ message: 'Confirmación de correo exitoso.' });
+                        res.status(200).redirect('http://localhost:4200/login');
                         _a.label = 7;
                     case 7: return [3 /*break*/, 14];
                     case 8:
