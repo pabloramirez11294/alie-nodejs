@@ -184,8 +184,8 @@ var RegisterController = /** @class */ (function () {
                             accessToken: accessToken
                         };
                         link = "http://localhost:3000/register/confirmar/" + accessToken;
-                        TXTUSER = 'kvothe.11294@gmail.com';
-                        TXTCLAVE = 'kVothe11294@';
+                        TXTUSER = process.env.MAILUSER;
+                        TXTCLAVE = process.env.MAILPASSWD;
                         transporter = nodemailer_1.default.createTransport({
                             service: 'gmail',
                             auth: {

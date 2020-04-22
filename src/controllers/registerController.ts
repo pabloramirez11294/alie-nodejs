@@ -18,7 +18,7 @@ class RegisterController{
     async run(req:Request,res:Response) {
         
         let connection;
-      
+        
         try {
           connection = await oracledb.getConnection(conexion);
       
@@ -90,8 +90,8 @@ class RegisterController{
 
         //**********************CORREO ``
         const link=`http://localhost:3000/register/confirmar/${accessToken}`;
-        const TXTUSER='kvothe.11294@gmail.com';
-        const TXTCLAVE='kVothe11294@';
+        const TXTUSER=process.env.MAILUSER;
+        const TXTCLAVE=process.env.MAILPASSWD;
         
         let transporter = nodemailer.createTransport({
           service: 'gmail',
