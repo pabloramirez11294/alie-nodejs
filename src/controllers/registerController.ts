@@ -14,36 +14,6 @@ class RegisterController{
     SECRET_KEY:string ='alie-sell';
 
      
-
-    async run(req:Request,res:Response) {
-        
-        let connection;
-        
-        try {
-          connection = await oracledb.getConnection(conexion);
-      
-          const result = await connection.execute("SELECT * FROM usuario");
-         // console.log(result.rows);
-         // res.send(JSON.stringify(result.rows));
-         res.json(result.rows);
-          //res.send("ho");
-      
-        } catch (err) {
-          console.error(err);
-          res.status(409).send({ message: 'Problema al listar.' });
-        } finally {
-          if (connection) {
-            try {
-              await connection.close();
-            } catch (err) {
-              console.error(err);
-              res.status(409).send({ message: 'Error al cerrar la conexión.' });
-            }
-          }
-        }
-      }
-      
-    
     public async create(req: Request, res: Response) {
       let connection;
       var salt = bcrypt.genSaltSync(10);
@@ -59,8 +29,9 @@ class RegisterController{
         await connection.execute('commit');*/
         console.log(req.body);
         
-        await connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono) '
-                              + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono)',req.body);
+        await connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,genero,direccion) '
+                              + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,'
+                              + ':genero,:direccion)',req.body);
         await connection.execute('commit');
 
         const result = await connection.execute(
@@ -105,23 +76,21 @@ class RegisterController{
           to: dataU.correo,
           subject: `Bienvenido `,
           html: `
-              <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#2d3436" bgcolor="#2d3436">
-              <tr height="200px">  
-                  <td bgcolor="" width="600px">
-                      <h1 style="color: #fff; text-align:center">Bienvenido a Alie Sell</h1>
-                      <p  style="color: #fff; text-align:center">
-                          <span style="color: #e84393">${req.body.nombre}</span> 
-                          a la aplicación
+              <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#96F726" bgcolor="#cddf89">
+              <tr height="150px">  
+                  <td width="750px">
+                      <h1 style="color: #0000FF; text-align:center">Bienvenido a Alie Sell</h1>
+                      <p  style="color: #0000FF; text-align:center">
+                          <span style="color: #FF0000">${req.body.nombre}</span>                           
                       </p>
                   </td>
               </tr>
-              <tr bgcolor="#fff">
+              <tr bgcolor="#EB5E27">
                   <td style="text-align:center">
-                      <p style="color: #000">Para confirmar su cuenta selecciones el siguiente enlace: ${link}</p>
+                      <p style="color: #FDFCFC">Para confirmar su cuenta selecciones el siguiente enlace: ${link}</p>
                   </td>
               </tr>
-              </table>
-          
+              </table>          
           `
           };
           transporter.sendMail(mail_options, (error, info) => {
@@ -286,55 +255,36 @@ class RegisterController{
         }
       }
     }
-
-   /*  enviarCorreo(req:Request,res:Response){
-      const TXTUSER='kvothe.11294@gmail.com';
-      const TXTCLAVE='kVothe11294@';
-      
-      console.log(TXTUSER);
-      const correo='pabloramirez.11294@gmail.com';
-      let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: TXTUSER,
-            pass: TXTCLAVE
-        }
-      });
-      let mail_options = {
-        from: TXTUSER,
-        to: correo,
-        subject: `Bienvenido `,
-        html: `
-            <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#2d3436" bgcolor="#2d3436">
-            <tr height="200px">  
-                <td bgcolor="" width="600px">
-                    <h1 style="color: #fff; text-align:center">Bienvenido a Alie Sell</h1>
-                    <p  style="color: #fff; text-align:center">
-                        <span style="color: #e84393">${TXTUSER}</span> 
-                        a la aplicación
-                    </p>
-                </td>
-            </tr>
-            <tr bgcolor="#fff">
-                <td style="text-align:center">
-                    <p style="color: #000">Para confirmar su cuenta selecciones el siguiente enlace.</p>
-                </td>
-            </tr>
-            </table>
+    
+    async run(req:Request,res:Response) {
         
-        `
-        };
-        transporter.sendMail(mail_options, (error, info) => {
-          if (error) {
-              console.log(error);
-          } else {
-              console.log('El correo se envío correctamente ' + info.response);
+      let connection;
+      
+      try {
+        connection = await oracledb.getConnection(conexion);
+    
+        const result = await connection.execute("SELECT * FROM usuario");
+       // console.log(result.rows);
+       // res.send(JSON.stringify(result.rows));
+       res.json(result.rows);
+        //res.send("ho");
+    
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al listar.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
           }
-        });
-        res.status(200).send('enviado');
-
-    } */
-
+        }
+      }
+    }
+    
+   
 }
 
 export const registerController=new RegisterController();

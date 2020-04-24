@@ -51,99 +51,10 @@ var conexion = {
 var RegisterController = /** @class */ (function () {
     function RegisterController() {
         this.SECRET_KEY = 'alie-sell';
-        /*  enviarCorreo(req:Request,res:Response){
-           const TXTUSER='kvothe.11294@gmail.com';
-           const TXTCLAVE='kVothe11294@';
-           
-           console.log(TXTUSER);
-           const correo='pabloramirez.11294@gmail.com';
-           let transporter = nodemailer.createTransport({
-             service: 'gmail',
-             auth: {
-                 user: TXTUSER,
-                 pass: TXTCLAVE
-             }
-           });
-           let mail_options = {
-             from: TXTUSER,
-             to: correo,
-             subject: `Bienvenido `,
-             html: `
-                 <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#2d3436" bgcolor="#2d3436">
-                 <tr height="200px">
-                     <td bgcolor="" width="600px">
-                         <h1 style="color: #fff; text-align:center">Bienvenido a Alie Sell</h1>
-                         <p  style="color: #fff; text-align:center">
-                             <span style="color: #e84393">${TXTUSER}</span>
-                             a la aplicación
-                         </p>
-                     </td>
-                 </tr>
-                 <tr bgcolor="#fff">
-                     <td style="text-align:center">
-                         <p style="color: #000">Para confirmar su cuenta selecciones el siguiente enlace.</p>
-                     </td>
-                 </tr>
-                 </table>
-             
-             `
-             };
-             transporter.sendMail(mail_options, (error, info) => {
-               if (error) {
-                   console.log(error);
-               } else {
-                   console.log('El correo se envío correctamente ' + info.response);
-               }
-             });
-             res.status(200).send('enviado');
-     
-         } */
     }
-    RegisterController.prototype.run = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var connection, result, err_1, err_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 3, 4, 9]);
-                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
-                    case 1:
-                        connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("SELECT * FROM usuario")];
-                    case 2:
-                        result = _a.sent();
-                        // console.log(result.rows);
-                        // res.send(JSON.stringify(result.rows));
-                        res.json(result.rows);
-                        return [3 /*break*/, 9];
-                    case 3:
-                        err_1 = _a.sent();
-                        console.error(err_1);
-                        res.status(409).send({ message: 'Problema al listar.' });
-                        return [3 /*break*/, 9];
-                    case 4:
-                        if (!connection) return [3 /*break*/, 8];
-                        _a.label = 5;
-                    case 5:
-                        _a.trys.push([5, 7, , 8]);
-                        return [4 /*yield*/, connection.close()];
-                    case 6:
-                        _a.sent();
-                        return [3 /*break*/, 8];
-                    case 7:
-                        err_2 = _a.sent();
-                        console.error(err_2);
-                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
-                        return [3 /*break*/, 8];
-                    case 8: return [7 /*endfinally*/];
-                    case 9: return [2 /*return*/];
-                }
-            });
-        });
-    };
     RegisterController.prototype.create = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, salt, hash, result, txt, txt2, _id, expiresIn, accessToken, dataU, link, TXTUSER, TXTCLAVE, transporter, mail_options, err_3, err_4;
+            var connection, salt, hash, result, txt, txt2, _id, expiresIn, accessToken, dataU, link, TXTUSER, TXTCLAVE, transporter, mail_options, err_1, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -161,8 +72,9 @@ var RegisterController = /** @class */ (function () {
                         { idbv: 1001, cbv: 'jose ortega' } );
                         await connection.execute('commit');*/
                         console.log(req.body);
-                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono) '
-                                + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono)', req.body)];
+                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,genero,direccion) '
+                                + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,'
+                                + ':genero,:direccion)', req.body)];
                     case 3:
                         _a.sent();
                         return [4 /*yield*/, connection.execute('commit')];
@@ -197,7 +109,7 @@ var RegisterController = /** @class */ (function () {
                             from: TXTUSER,
                             to: dataU.correo,
                             subject: "Bienvenido ",
-                            html: "\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600px\" background-color=\"#2d3436\" bgcolor=\"#2d3436\">\n              <tr height=\"200px\">  \n                  <td bgcolor=\"\" width=\"600px\">\n                      <h1 style=\"color: #fff; text-align:center\">Bienvenido a Alie Sell</h1>\n                      <p  style=\"color: #fff; text-align:center\">\n                          <span style=\"color: #e84393\">" + req.body.nombre + "</span> \n                          a la aplicaci\u00F3n\n                      </p>\n                  </td>\n              </tr>\n              <tr bgcolor=\"#fff\">\n                  <td style=\"text-align:center\">\n                      <p style=\"color: #000\">Para confirmar su cuenta selecciones el siguiente enlace: " + link + "</p>\n                  </td>\n              </tr>\n              </table>\n          \n          "
+                            html: "\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600px\" background-color=\"#96F726\" bgcolor=\"#cddf89\">\n              <tr height=\"150px\">  \n                  <td width=\"750px\">\n                      <h1 style=\"color: #0000FF; text-align:center\">Bienvenido a Alie Sell</h1>\n                      <p  style=\"color: #0000FF; text-align:center\">\n                          <span style=\"color: #FF0000\">" + req.body.nombre + "</span>                           \n                      </p>\n                  </td>\n              </tr>\n              <tr bgcolor=\"#EB5E27\">\n                  <td style=\"text-align:center\">\n                      <p style=\"color: #FDFCFC\">Para confirmar su cuenta selecciones el siguiente enlace: " + link + "</p>\n                  </td>\n              </tr>\n              </table>          \n          "
                         };
                         transporter.sendMail(mail_options, function (error, info) {
                             if (error) {
@@ -212,8 +124,8 @@ var RegisterController = /** @class */ (function () {
                         res.status(200).send({ dataU: dataU });
                         return [3 /*break*/, 12];
                     case 6:
-                        err_3 = _a.sent();
-                        console.error(err_3);
+                        err_1 = _a.sent();
+                        console.error(err_1);
                         res.status(409).send({ message: 'Problema al registrarse.' });
                         return [3 /*break*/, 12];
                     case 7:
@@ -226,8 +138,8 @@ var RegisterController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 11];
                     case 10:
-                        err_4 = _a.sent();
-                        console.error(err_4);
+                        err_2 = _a.sent();
+                        console.error(err_2);
                         res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 11];
                     case 11: return [7 /*endfinally*/];
@@ -238,7 +150,7 @@ var RegisterController = /** @class */ (function () {
     };
     RegisterController.prototype.loginUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, userData, result, txt, txt2, txt3, _id, resultPassword, accessToken, dataU, err_5, err_6;
+            var connection, userData, result, txt, txt2, txt3, _id, resultPassword, accessToken, dataU, err_3, err_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -285,12 +197,12 @@ var RegisterController = /** @class */ (function () {
                         }
                         return [3 /*break*/, 10];
                     case 4:
-                        err_5 = _a.sent();
-                        if (err_5.errorNum === 1403)
+                        err_3 = _a.sent();
+                        if (err_3.errorNum === 1403)
                             res.status(409).send({ message: 'Correo no existe.' });
                         else
                             res.status(409).send({ message: 'Problema al logearse.' });
-                        console.error(err_5);
+                        console.error(err_3);
                         return [3 /*break*/, 10];
                     case 5:
                         if (!connection) return [3 /*break*/, 9];
@@ -302,8 +214,8 @@ var RegisterController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 9];
                     case 8:
-                        err_6 = _a.sent();
-                        console.error(err_6);
+                        err_4 = _a.sent();
+                        console.error(err_4);
                         res.status(409).send({ message: 'Problema al cerra la conexión.' });
                         return [3 /*break*/, 9];
                     case 9: return [7 /*endfinally*/];
@@ -314,7 +226,7 @@ var RegisterController = /** @class */ (function () {
     };
     RegisterController.prototype.confirmarCorreo = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, id, txt_id, result, err_7, err_8;
+            var connection, id, txt_id, result, err_5, err_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -349,8 +261,8 @@ var RegisterController = /** @class */ (function () {
                         _a.label = 7;
                     case 7: return [3 /*break*/, 14];
                     case 8:
-                        err_7 = _a.sent();
-                        console.error(err_7);
+                        err_5 = _a.sent();
+                        console.error(err_5);
                         res.status(409).send({ message: 'Problema al confirmar correo.' });
                         return [3 /*break*/, 14];
                     case 9:
@@ -363,12 +275,54 @@ var RegisterController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 13];
                     case 12:
-                        err_8 = _a.sent();
-                        console.error(err_8);
+                        err_6 = _a.sent();
+                        console.error(err_6);
                         res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 13];
                     case 13: return [7 /*endfinally*/];
                     case 14: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RegisterController.prototype.run = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, result, err_7, err_8;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, 4, 9]);
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 1:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("SELECT * FROM usuario")];
+                    case 2:
+                        result = _a.sent();
+                        // console.log(result.rows);
+                        // res.send(JSON.stringify(result.rows));
+                        res.json(result.rows);
+                        return [3 /*break*/, 9];
+                    case 3:
+                        err_7 = _a.sent();
+                        console.error(err_7);
+                        res.status(409).send({ message: 'Problema al listar.' });
+                        return [3 /*break*/, 9];
+                    case 4:
+                        if (!connection) return [3 /*break*/, 8];
+                        _a.label = 5;
+                    case 5:
+                        _a.trys.push([5, 7, , 8]);
+                        return [4 /*yield*/, connection.close()];
+                    case 6:
+                        _a.sent();
+                        return [3 /*break*/, 8];
+                    case 7:
+                        err_8 = _a.sent();
+                        console.error(err_8);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 8];
+                    case 8: return [7 /*endfinally*/];
+                    case 9: return [2 /*return*/];
                 }
             });
         });
