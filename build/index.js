@@ -4,12 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var indexRoutes_1 = __importDefault(require("./routes/indexRoutes"));
-var ruta2_1 = __importDefault(require("./routes/ruta2"));
-var loginRoutes_1 = __importDefault(require("./routes/loginRoutes"));
-var registerRoutes_1 = __importDefault(require("./routes/registerRoutes"));
 var morgan_1 = __importDefault(require("morgan"));
 var cors_1 = __importDefault(require("cors"));
+//rutas
+var registerRoutes_1 = __importDefault(require("./routes/registerRoutes"));
+var productoRoutes_1 = __importDefault(require("./routes/productoRoutes"));
 var Server = /** @class */ (function () {
     function Server() {
         this.app = express_1.default();
@@ -24,10 +23,8 @@ var Server = /** @class */ (function () {
         this.app.use(express_1.default.urlencoded({ extended: false }));
     };
     Server.prototype.routes = function () {
-        this.app.use(indexRoutes_1.default);
-        this.app.use('/ruta2', ruta2_1.default);
-        this.app.use('/login', loginRoutes_1.default);
         this.app.use('/register', registerRoutes_1.default);
+        this.app.use('/productos', productoRoutes_1.default);
     };
     Server.prototype.start = function () {
         var _this = this;

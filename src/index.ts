@@ -1,10 +1,9 @@
 import express,{Application} from 'express';
-import indexRoutes from './routes/indexRoutes';
-import ruta2 from './routes/ruta2';
-import loginRoutes from './routes/loginRoutes';
-import registerRoutes from './routes/registerRoutes';
 import morgan from 'morgan';
 import cors from 'cors';
+//rutas
+import registerRoutes from './routes/registerRoutes';
+import productosRoutes from './routes/productoRoutes';
 
 class Server{
     public app:Application;
@@ -21,10 +20,8 @@ class Server{
         this.app.use(express.urlencoded({extended:false}));
     }
     routes():void{
-        this.app.use(indexRoutes);
-        this.app.use('/ruta2',ruta2);
-        this.app.use('/login',loginRoutes);
         this.app.use('/register',registerRoutes);
+        this.app.use('/productos',productosRoutes);
     }
     start():void{
         this.app.listen(this.app.get('port'),()=>{
