@@ -40,54 +40,110 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var oracledb_1 = __importDefault(require("oracledb"));
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var conexion = {
     user: "alie",
     password: "alie",
     connectString: "(DESCRIPTION =(LOAD_BALANCE = ON)(FAILOVER = ON)(ADDRESS =(PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))(ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE)(FAILOVER_MODE=(TYPE=SELECT)(METHOD = BASIC))))"
+};
+var producto = {
+    nombre: '',
+    imagen: '',
+    descripcion: '',
+    precio: 1,
+    fecha_publicacion: '',
+    cantidad: 1,
+    color: '',
+    estado: 1,
+    id_categoria: 0,
+    id_usuario: 0
 };
 var ProductosController = /** @class */ (function () {
     function ProductosController() {
     }
     ProductosController.prototype.create = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, err_1, err_2;
+            var connection, txtCategoria, categorias, txt_id, primero, _id, _i, categorias_1, cat, result, txt, txt2, err_1, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 4, 5, 10]);
-                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                        txtCategoria = req.body.categoria;
+                        categorias = txtCategoria.split('-');
+                        _a.label = 1;
                     case 1:
-                        connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("INSERT INTO PRODUCTO values(pk_producto.nextval,:nombre,:imagen,:descripcion,:precio," +
-                                ":fecha_publicacion,:cantidad,:color,:estado,:id_categoria,:id_usuario)", req.body)];
+                        _a.trys.push([1, 12, 13, 18]);
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(req.body.id_usuario, 'alie-sell')];
                     case 2:
+                        txt_id = _a.sent();
+                        producto.nombre = req.body.nombre;
+                        producto.imagen = req.body.imagen;
+                        producto.descripcion = req.body.descripcion;
+                        producto.precio = req.body.precio;
+                        producto.fecha_publicacion = req.body.fecha_publicacion;
+                        producto.cantidad = req.body.cantidad;
+                        producto.color = req.body.color;
+                        producto.estado = req.body.estado;
+                        producto.id_usuario = txt_id._id;
+                        console.log(producto, categorias);
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 3:
+                        connection = _a.sent();
+                        primero = true;
+                        _id = 0;
+                        if (!(categorias[0] !== '')) return [3 /*break*/, 9];
+                        _i = 0, categorias_1 = categorias;
+                        _a.label = 4;
+                    case 4:
+                        if (!(_i < categorias_1.length)) return [3 /*break*/, 9];
+                        cat = categorias_1[_i];
+                        if (!primero) return [3 /*break*/, 6];
+                        primero = false;
+                        return [4 /*yield*/, connection.execute("INSERT INTO categoria VALUES (pk_categoria.nextval,:nombre,null) RETURN id_categoria INTO :id", { nombre: cat,
+                                id: { type: oracledb_1.default.NUMBER, dir: oracledb_1.default.BIND_OUT } }, { autoCommit: true })];
+                    case 5:
+                        result = _a.sent();
+                        txt = result;
+                        txt2 = txt.outBinds;
+                        _id = txt2.id[0];
+                        producto.id_categoria = _id;
+                        return [3 /*break*/, 8];
+                    case 6: return [4 /*yield*/, connection.execute("INSERT INTO categoria VALUES (pk_categoria.nextval,:categoria,:id)", { categoria: cat, id: _id })];
+                    case 7:
+                        _a.sent();
+                        _a.label = 8;
+                    case 8:
+                        _i++;
+                        return [3 /*break*/, 4];
+                    case 9: return [4 /*yield*/, connection.execute("INSERT INTO PRODUCTO values(pk_producto.nextval,:nombre,:imagen,:descripcion,:precio," +
+                            ":fecha_publicacion,:cantidad,:color,:estado,:id_categoria,:id_usuario)", producto)];
+                    case 10:
                         _a.sent();
                         return [4 /*yield*/, connection.execute("commit")];
-                    case 3:
+                    case 11:
                         _a.sent();
                         res.status(200).send({ message: "Producto guardado" });
-                        return [3 /*break*/, 10];
-                    case 4:
+                        return [3 /*break*/, 18];
+                    case 12:
                         err_1 = _a.sent();
                         console.error(err_1);
                         res.status(409).send({ message: "Problema al crear producto." });
-                        return [3 /*break*/, 10];
-                    case 5:
-                        if (!connection) return [3 /*break*/, 9];
-                        _a.label = 6;
-                    case 6:
-                        _a.trys.push([6, 8, , 9]);
+                        return [3 /*break*/, 18];
+                    case 13:
+                        if (!connection) return [3 /*break*/, 17];
+                        _a.label = 14;
+                    case 14:
+                        _a.trys.push([14, 16, , 17]);
                         return [4 /*yield*/, connection.close()];
-                    case 7:
+                    case 15:
                         _a.sent();
-                        return [3 /*break*/, 9];
-                    case 8:
+                        return [3 /*break*/, 17];
+                    case 16:
                         err_2 = _a.sent();
                         console.error(err_2);
                         res.status(409).send({ message: "Error al cerrar la conexión." });
-                        return [3 /*break*/, 9];
-                    case 9: return [7 /*endfinally*/];
-                    case 10: return [2 /*return*/];
+                        return [3 /*break*/, 17];
+                    case 17: return [7 /*endfinally*/];
+                    case 18: return [2 /*return*/];
                 }
             });
         });
