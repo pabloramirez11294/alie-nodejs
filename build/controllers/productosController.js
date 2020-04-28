@@ -194,23 +194,68 @@ var ProductosController = /** @class */ (function () {
     };
     ProductosController.prototype.listar = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, result, err_5, err_6;
+            var connection, id, _id, result, err_5, err_6;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 4, 5, 10]);
+                        id = req.params.id;
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, 'alie-sell')];
+                    case 1:
+                        _id = (_a.sent())._id;
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 2:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE estado=1 AND id_usuario=:id", { id: _id })];
+                    case 3:
+                        result = _a.sent();
+                        res.status(200).send(result.rows);
+                        return [3 /*break*/, 10];
+                    case 4:
+                        err_5 = _a.sent();
+                        console.error(err_5);
+                        res.status(409).send({ message: "Problema al listar productos." });
+                        return [3 /*break*/, 10];
+                    case 5:
+                        if (!connection) return [3 /*break*/, 9];
+                        _a.label = 6;
+                    case 6:
+                        _a.trys.push([6, 8, , 9]);
+                        return [4 /*yield*/, connection.close()];
+                    case 7:
+                        _a.sent();
+                        return [3 /*break*/, 9];
+                    case 8:
+                        err_6 = _a.sent();
+                        console.error(err_6);
+                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        return [3 /*break*/, 9];
+                    case 9: return [7 /*endfinally*/];
+                    case 10: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ProductosController.prototype.buscar = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, nombre, result, err_7, err_8;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, 4, 9]);
+                        nombre = req.params.nombre;
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 1:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE id_usuario=:id", req.body)];
+                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE estado=1 AND nombre like '%" + nombre + "%'")];
                     case 2:
                         result = _a.sent();
                         res.status(200).send(result.rows);
                         return [3 /*break*/, 9];
                     case 3:
-                        err_5 = _a.sent();
-                        console.error(err_5);
-                        res.status(409).send({ message: "Problema al listar productos." });
+                        err_7 = _a.sent();
+                        console.error(err_7);
+                        res.status(409).send({ message: "Problema al buscar productos." });
                         return [3 /*break*/, 9];
                     case 4:
                         if (!connection) return [3 /*break*/, 8];
@@ -222,8 +267,8 @@ var ProductosController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 8];
                     case 7:
-                        err_6 = _a.sent();
-                        console.error(err_6);
+                        err_8 = _a.sent();
+                        console.error(err_8);
                         res.status(409).send({ message: "Error al cerrar la conexión." });
                         return [3 /*break*/, 8];
                     case 8: return [7 /*endfinally*/];

@@ -10,7 +10,8 @@ var ProductosRoutes = /** @class */ (function () {
     ProductosRoutes.prototype.config = function () {
         this.router.post('/crear', productosController_1.productosController.create);
         this.router.put('/eliminar', productosController_1.productosController.eliminar);
-        this.router.get('/listar', productosController_1.productosController.listar);
+        this.router.get('/listar/:id', productosController_1.productosController.listar);
+        this.router.get('/buscar/:nombre', productosController_1.productosController.buscar);
     };
     return ProductosRoutes;
 }());

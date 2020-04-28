@@ -111,14 +111,39 @@ let producto= {
     }
 
     public async listar(req: Request, res: Response) {     
+      
       let connection;
       try {
+        const { id }:any=req.params;
+        const {_id}:any=await jwt.verify(id,'alie-sell');
         connection = await oracledb.getConnection(conexion);
-        const result = await connection.execute("SELECT * FROM producto WHERE id_usuario=:id",req.body);
+        const result = await connection.execute("SELECT * FROM producto WHERE estado=1 AND id_usuario=:id",{id:_id});
         res.status(200).send(result.rows);
       } catch (err) {
         console.error(err);
         res.status(409).send({ message: "Problema al listar productos." });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: "Error al cerrar la conexión." });
+          }
+        }
+      }
+    }
+
+    public async buscar(req: Request, res: Response) {
+      let connection;
+      try {
+        const { nombre }:any=req.params;
+        connection = await oracledb.getConnection(conexion);
+        const result = await connection.execute(`SELECT * FROM producto WHERE estado=1 AND nombre like '%${nombre}%'`);
+        res.status(200).send(result.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: "Problema al buscar productos." });
       } finally {
         if (connection) {
           try {

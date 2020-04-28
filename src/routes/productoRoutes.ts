@@ -13,7 +13,8 @@ class ProductosRoutes {
     config() {
         this.router.post('/crear', productosController.create);       
         this.router.put('/eliminar',productosController.eliminar);
-        this.router.get('/listar',productosController.listar);
+        this.router.get('/listar/:id',productosController.listar);
+        this.router.get('/buscar/:nombre',productosController.buscar);
     }
     
     
