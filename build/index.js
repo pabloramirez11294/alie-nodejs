@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var morgan_1 = __importDefault(require("morgan"));
 var cors_1 = __importDefault(require("cors"));
+var path_1 = __importDefault(require("path"));
 //rutas
 var registerRoutes_1 = __importDefault(require("./routes/registerRoutes"));
 var productoRoutes_1 = __importDefault(require("./routes/productoRoutes"));
@@ -25,6 +26,7 @@ var Server = /** @class */ (function () {
     Server.prototype.routes = function () {
         this.app.use('/register', registerRoutes_1.default);
         this.app.use('/productos', productoRoutes_1.default);
+        this.app.use('/storage', express_1.default.static(path_1.default.resolve('storage')));
     };
     Server.prototype.start = function () {
         var _this = this;

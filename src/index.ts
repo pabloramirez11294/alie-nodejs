@@ -1,6 +1,7 @@
 import express,{Application} from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import path from 'path';
 //rutas
 import registerRoutes from './routes/registerRoutes';
 import productosRoutes from './routes/productoRoutes';
@@ -22,6 +23,7 @@ class Server{
     routes():void{
         this.app.use('/register',registerRoutes);
         this.app.use('/productos',productosRoutes);
+        this.app.use('/storage',express.static(path.resolve('storage')));
     }
     start():void{
         this.app.listen(this.app.get('port'),()=>{

@@ -277,6 +277,13 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
+    ProductosController.prototype.cargarImagen = function (req, res) {
+        var _a = req.body, title = _a.title, description = _a.description;
+        return res.status(200).json({
+            message: 'Imagen guardada.',
+            imagePath: req.file.path
+        });
+    };
     return ProductosController;
 }());
 exports.productosController = new ProductosController();

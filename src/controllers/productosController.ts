@@ -156,6 +156,13 @@ let producto= {
       }
     }
 
+    public cargarImagen(req: Request, res: Response){
+      const { title, description } = req.body;
+      return res.status(200).json({
+        message:'Imagen guardada.',
+        imagePath: req.file.path
+      });
+    }
   }
 
 export const productosController=new ProductosController();
