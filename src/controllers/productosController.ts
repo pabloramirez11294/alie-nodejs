@@ -140,6 +140,32 @@ let producto= {
       }
     }
 
+    public async getProducto(req: Request, res: Response){
+      let connection;
+      try {
+        const { codigo }: any = req.params;
+        console.log(codigo)
+        connection = await oracledb.getConnection(conexion);
+        const result = await connection.execute(
+          "SELECT * FROM producto WHERE estado=1 AND codigo=:codigo",
+          { codigo: codigo }
+        );
+        res.status(200).send(result.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: "Problema al obtener producto." });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: "Error al cerrar la conexión." });
+          }
+        }
+      }
+    }    
+
     public async buscar(req: Request, res: Response) {
       let connection;
       try {

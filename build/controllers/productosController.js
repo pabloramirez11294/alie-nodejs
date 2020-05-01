@@ -238,18 +238,19 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
-    ProductosController.prototype.buscar = function (req, res) {
+    ProductosController.prototype.getProducto = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, nombre, result, err_7, err_8;
+            var connection, codigo, result, err_7, err_8;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, 4, 9]);
-                        nombre = req.params.nombre;
+                        codigo = req.params.codigo;
+                        console.log(codigo);
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 1:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE estado=1 AND nombre like '%" + nombre + "%'")];
+                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE estado=1 AND codigo=:codigo", { codigo: codigo })];
                     case 2:
                         result = _a.sent();
                         res.status(200).send(result.rows);
@@ -257,7 +258,7 @@ var ProductosController = /** @class */ (function () {
                     case 3:
                         err_7 = _a.sent();
                         console.error(err_7);
-                        res.status(409).send({ message: "Problema al buscar productos." });
+                        res.status(409).send({ message: "Problema al obtener producto." });
                         return [3 /*break*/, 9];
                     case 4:
                         if (!connection) return [3 /*break*/, 8];
@@ -279,6 +280,47 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
+    ProductosController.prototype.buscar = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, nombre, result, err_9, err_10;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, 4, 9]);
+                        nombre = req.params.nombre;
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 1:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE estado=1 AND nombre like '%" + nombre + "%'")];
+                    case 2:
+                        result = _a.sent();
+                        res.status(200).send(result.rows);
+                        return [3 /*break*/, 9];
+                    case 3:
+                        err_9 = _a.sent();
+                        console.error(err_9);
+                        res.status(409).send({ message: "Problema al buscar productos." });
+                        return [3 /*break*/, 9];
+                    case 4:
+                        if (!connection) return [3 /*break*/, 8];
+                        _a.label = 5;
+                    case 5:
+                        _a.trys.push([5, 7, , 8]);
+                        return [4 /*yield*/, connection.close()];
+                    case 6:
+                        _a.sent();
+                        return [3 /*break*/, 8];
+                    case 7:
+                        err_10 = _a.sent();
+                        console.error(err_10);
+                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        return [3 /*break*/, 8];
+                    case 8: return [7 /*endfinally*/];
+                    case 9: return [2 /*return*/];
+                }
+            });
+        });
+    };
     ProductosController.prototype.cargarImagen = function (req, res) {
         return res.status(200).json({
             message: "Imagen guardada.",
@@ -287,7 +329,7 @@ var ProductosController = /** @class */ (function () {
     };
     ProductosController.prototype.cargaMasiva = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, _a, texto, id_usuario, tuplas, txt_id, _i, tuplas_1, tupla, campos, fechaArreglada, txtCategoria, categorias, primero, _id, _b, categorias_2, cat, result, txt, txt2, err_9, err_10;
+            var connection, _a, texto, id_usuario, tuplas, txt_id, _i, tuplas_1, tupla, campos, fechaArreglada, txtCategoria, categorias, primero, _id, _b, categorias_2, cat, result, txt, txt2, err_11, err_12;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -412,8 +454,8 @@ var ProductosController = /** @class */ (function () {
                         res.status(200).send({ message: "Se guardo carga masiva." });
                         return [3 /*break*/, 21];
                     case 15:
-                        err_9 = _c.sent();
-                        console.error(err_9);
+                        err_11 = _c.sent();
+                        console.error(err_11);
                         res.status(409).send({ message: "Problema carga masiva." });
                         return [3 /*break*/, 21];
                     case 16:
@@ -426,8 +468,8 @@ var ProductosController = /** @class */ (function () {
                         _c.sent();
                         return [3 /*break*/, 20];
                     case 19:
-                        err_10 = _c.sent();
-                        console.error(err_10);
+                        err_12 = _c.sent();
+                        console.error(err_12);
                         res.status(409).send({ message: "Error al cerrar la conexión." });
                         return [3 /*break*/, 20];
                     case 20: return [7 /*endfinally*/];
