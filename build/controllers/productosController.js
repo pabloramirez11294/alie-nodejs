@@ -68,11 +68,11 @@ var ProductosController = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         txtCategoria = req.body.categoria;
-                        categorias = txtCategoria.split('-');
+                        categorias = txtCategoria.split("-");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 12, 13, 18]);
-                        return [4 /*yield*/, jsonwebtoken_1.default.verify(req.body.id_usuario, 'alie-sell')];
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(req.body.id_usuario, "alie-sell")];
                     case 2:
                         txt_id = _a.sent();
                         producto.nombre = req.body.nombre;
@@ -90,7 +90,7 @@ var ProductosController = /** @class */ (function () {
                         connection = _a.sent();
                         primero = true;
                         _id = 0;
-                        if (!(categorias[0] !== '')) return [3 /*break*/, 9];
+                        if (!(categorias[0] !== "")) return [3 /*break*/, 9];
                         _i = 0, categorias_1 = categorias;
                         _a.label = 4;
                     case 4:
@@ -98,8 +98,10 @@ var ProductosController = /** @class */ (function () {
                         cat = categorias_1[_i];
                         if (!primero) return [3 /*break*/, 6];
                         primero = false;
-                        return [4 /*yield*/, connection.execute("INSERT INTO categoria VALUES (pk_categoria.nextval,:nombre,null) RETURN id_categoria INTO :id", { nombre: cat,
-                                id: { type: oracledb_1.default.NUMBER, dir: oracledb_1.default.BIND_OUT } }, { autoCommit: true })];
+                        return [4 /*yield*/, connection.execute("INSERT INTO categoria VALUES (pk_categoria.nextval,:nombre,null) RETURN id_categoria INTO :id", {
+                                nombre: cat,
+                                id: { type: oracledb_1.default.NUMBER, dir: oracledb_1.default.BIND_OUT },
+                            }, { autoCommit: true })];
                     case 5:
                         result = _a.sent();
                         txt = result;
@@ -200,7 +202,7 @@ var ProductosController = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 4, 5, 10]);
                         id = req.params.id;
-                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, 'alie-sell')];
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, "alie-sell")];
                     case 1:
                         _id = (_a.sent())._id;
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
@@ -278,10 +280,160 @@ var ProductosController = /** @class */ (function () {
         });
     };
     ProductosController.prototype.cargarImagen = function (req, res) {
-        var _a = req.body, title = _a.title, description = _a.description;
         return res.status(200).json({
-            message: 'Imagen guardada.',
-            imagePath: req.file.path
+            message: "Imagen guardada.",
+            imagePath: req.file.path,
+        });
+    };
+    ProductosController.prototype.cargaMasiva = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, _a, texto, id_usuario, tuplas, txt_id, _i, tuplas_1, tupla, campos, fechaArreglada, txtCategoria, categorias, primero, _id, _b, categorias_2, cat, result, txt, txt2, err_9, err_10;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _a = req.body, texto = _a.texto, id_usuario = _a.id_usuario;
+                        tuplas = texto.split("\n");
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id_usuario, "alie-sell")];
+                    case 1:
+                        txt_id = _c.sent();
+                        _c.label = 2;
+                    case 2:
+                        _c.trys.push([2, 15, 16, 21]);
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 3:
+                        connection = _c.sent();
+                        _i = 0, tuplas_1 = tuplas;
+                        _c.label = 4;
+                    case 4:
+                        if (!(_i < tuplas_1.length)) return [3 /*break*/, 14];
+                        tupla = tuplas_1[_i];
+                        campos = tupla.split(",");
+                        // console.log(campos);
+                        producto.nombre = campos[0];
+                        producto.imagen = campos[1];
+                        producto.descripcion = campos[2];
+                        producto.precio = Number.parseFloat(campos[3]);
+                        fechaArreglada = function (fecha) {
+                            var separador = fecha.split(" ");
+                            var year = separador[3];
+                            var mes = separador[1];
+                            var dia = separador[2];
+                            var numMes;
+                            switch (mes) {
+                                case "Jan":
+                                    numMes = 1;
+                                    break;
+                                case "Feb":
+                                    numMes = 2;
+                                    break;
+                                case "Mar":
+                                    numMes = 3;
+                                    break;
+                                case "Apr":
+                                    numMes = 4;
+                                    break;
+                                case "May":
+                                    numMes = 5;
+                                    break;
+                                case "Jun":
+                                    numMes = 6;
+                                    break;
+                                case "Jul":
+                                    numMes = 7;
+                                    break;
+                                case "Aug":
+                                    numMes = 8;
+                                    break;
+                                case "Sep":
+                                    numMes = 9;
+                                    break;
+                                case "Oct":
+                                    numMes = 10;
+                                    break;
+                                case "Nov":
+                                    numMes = 11;
+                                    break;
+                                case "Dec":
+                                    numMes = 12;
+                                    break;
+                                default:
+                                    numMes = 1;
+                            }
+                            var fechaArreglada = dia + "-" + numMes + "-" + year;
+                            return fechaArreglada;
+                        };
+                        producto.fecha_publicacion = fechaArreglada(new Date().toDateString());
+                        producto.cantidad = Number.parseInt(campos[4]);
+                        producto.color = campos[5];
+                        producto.estado = 1;
+                        producto.id_usuario = txt_id._id;
+                        txtCategoria = campos[6];
+                        categorias = txtCategoria.split("-");
+                        primero = true;
+                        _id = 0;
+                        if (!(categorias[0] !== "")) return [3 /*break*/, 10];
+                        _b = 0, categorias_2 = categorias;
+                        _c.label = 5;
+                    case 5:
+                        if (!(_b < categorias_2.length)) return [3 /*break*/, 10];
+                        cat = categorias_2[_b];
+                        if (!primero) return [3 /*break*/, 7];
+                        primero = false;
+                        return [4 /*yield*/, connection.execute("INSERT INTO categoria VALUES (pk_categoria.nextval,:nombre,null) RETURN id_categoria INTO :id", {
+                                nombre: cat,
+                                id: { type: oracledb_1.default.NUMBER, dir: oracledb_1.default.BIND_OUT },
+                            }, { autoCommit: true })];
+                    case 6:
+                        result = _c.sent();
+                        txt = result;
+                        txt2 = txt.outBinds;
+                        _id = txt2.id[0];
+                        producto.id_categoria = _id;
+                        return [3 /*break*/, 9];
+                    case 7: return [4 /*yield*/, connection.execute("INSERT INTO categoria VALUES (pk_categoria.nextval,:nombre,:id)", { nombre: cat, id: _id })];
+                    case 8:
+                        _c.sent();
+                        _c.label = 9;
+                    case 9:
+                        _b++;
+                        return [3 /*break*/, 5];
+                    case 10: return [4 /*yield*/, connection.execute("INSERT INTO PRODUCTO values(pk_producto.nextval,:nombre,:imagen,:descripcion,:precio," +
+                            ":fecha_publicacion,:cantidad,:color,:estado,:id_categoria,:id_usuario)", producto)];
+                    case 11:
+                        _c.sent();
+                        return [4 /*yield*/, connection.execute("commit")];
+                    case 12:
+                        _c.sent();
+                        _c.label = 13;
+                    case 13:
+                        _i++;
+                        return [3 /*break*/, 4];
+                    case 14:
+                        res.status(200).send({ message: "Se guardo carga masiva." });
+                        return [3 /*break*/, 21];
+                    case 15:
+                        err_9 = _c.sent();
+                        console.error(err_9);
+                        res.status(409).send({ message: "Problema carga masiva." });
+                        return [3 /*break*/, 21];
+                    case 16:
+                        if (!connection) return [3 /*break*/, 20];
+                        _c.label = 17;
+                    case 17:
+                        _c.trys.push([17, 19, , 20]);
+                        return [4 /*yield*/, connection.close()];
+                    case 18:
+                        _c.sent();
+                        return [3 /*break*/, 20];
+                    case 19:
+                        err_10 = _c.sent();
+                        console.error(err_10);
+                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        return [3 /*break*/, 20];
+                    case 20: return [7 /*endfinally*/];
+                    case 21: return [2 /*return*/];
+                }
+            });
         });
     };
     return ProductosController;

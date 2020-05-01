@@ -17,6 +17,7 @@ var ProductosRoutes = /** @class */ (function () {
         this.router.get('/listar/:id', productosController_1.productosController.listar);
         this.router.get('/buscar/:nombre', productosController_1.productosController.buscar);
         this.router.post('/cargarImagen', multer_1.default.single('nameImage'), productosController_1.productosController.cargarImagen);
+        this.router.post('/cargaMasiva', productosController_1.productosController.cargaMasiva);
     };
     return ProductosRoutes;
 }());
