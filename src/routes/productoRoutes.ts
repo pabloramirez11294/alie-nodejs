@@ -18,6 +18,9 @@ class ProductosRoutes {
         this.router.get('/buscar/:nombre',productosController.buscar);
         this.router.post('/cargarImagen',multer.single('nameImage'),productosController.cargarImagen);  
         this.router.post('/cargaMasiva', productosController.cargaMasiva);   
+        this.router.post('/agregarCarrito', productosController.agregarCarrito);  
+        this.router.get('/getCarrito/:id', productosController.getCarrito);  
+        this.router.put('/comprar',productosController.comprar);
 
     }
     

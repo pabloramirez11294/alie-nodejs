@@ -19,26 +19,95 @@ class RegisterController{
       var salt = bcrypt.genSaltSync(10);
       var hash = bcrypt.hashSync(req.body.clave, salt);
       req.body.clave=hash;
-      
+      function getRandomCredit(min:number, max:number) {
+        const n= Math.floor(Math.random() * (max - min)) + min;
+        let res:number;
+        switch (n) {
+          case 1:
+            res=50000.00;
+            break;
+          case 2:
+            res=25000.00;
+            break;
+          case 3:
+            res=10000.00;
+            break;
+          case 4:
+            res=5000.00;
+            break;
+          default:
+            res=1000.00;
+        }
+        return res;
+      }
+      const credito=getRandomCredit(1,5);
+      req.body.credito=credito;
+      req.body.ganancia=0.00;
+      req.body.estado=1;
+      const fechaArreglada = function (fecha: string): string {
+        let separador = fecha.split(" ");
+        let year = separador[3];
+        let mes = separador[1];
+        let dia = separador[2];
+        let numMes: number;
+        switch (mes) {
+          case "Jan":
+            numMes = 1;
+            break;
+          case "Feb":
+            numMes = 2;
+            break;
+          case "Mar":
+            numMes = 3;
+            break;
+          case "Apr":
+            numMes = 4;
+            break;
+          case "May":
+            numMes = 5;
+            break;
+          case "Jun":
+            numMes = 6;
+            break;
+          case "Jul":
+            numMes = 7;
+            break;
+          case "Aug":
+            numMes = 8;
+            break;
+          case "Sep":
+            numMes = 9;
+            break;
+          case "Oct":
+            numMes = 10;
+            break;
+          case "Nov":
+            numMes = 11;
+            break;
+          case "Dec":
+            numMes = 12;
+            break;
+          default:
+            numMes = 1;
+        }
+        let fechaArreglada = dia + "-" + numMes + "-" + year;
+        return fechaArreglada;
+      };
+      req.body.fecha_reg = fechaArreglada(
+        new Date().toDateString()
+      );
       try {
-        connection = await oracledb.getConnection(conexion);
-    
-        /*
-        await connection.execute('insert into cliente values(:idbv, :cbv)',
-        { idbv: 1001, cbv: 'jose ortega' } );
-        await connection.execute('commit');*/
-        console.log(req.body);
-        
-        await connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,genero,direccion) '
-                              + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,'
-                              + ':genero,:direccion)',req.body);
-        await connection.execute('commit');
+       // console.log(req.body);   
+        connection = await oracledb.getConnection(conexion);             
+        await connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,fecha_reg,genero,direccion,credito,ganancia,estado) '
+                              + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,:fecha_reg,'
+                              + ':genero,:direccion,:credito,:ganancia,:estado)',req.body,{ autoCommit: true });
 
         const result = await connection.execute(
           `BEGIN
-              SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;
+              SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo and ROWNUM = 1;
             END;`,
-          {  // bind variables
+          {   
             correo:   req.body.correo,
             id_u: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 40 },
           }
@@ -53,6 +122,8 @@ class RegisterController{
           accessToken:accessToken,
           expireIns:expiresIn
         } */
+        await connection.execute('insert into carrito values(pk_carrito.nextval,:id)',{id:_id},
+        { autoCommit: true });    
         const accessToken = jwt.sign({_id:_id},'alie-sell');
         const dataU={
           correo:req.body.correo,
@@ -235,11 +306,7 @@ class RegisterController{
           await connection.execute('commit');
                 
             res.status(200).redirect('http://localhost:4200/login');
-        }
-        
-        
-
-    
+        } 
       } catch (err) {
         console.error(err);
         res.status(409).send({ message: 'Problema al confirmar correo.' });

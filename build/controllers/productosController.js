@@ -478,6 +478,122 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
+    ProductosController.prototype.agregarCarrito = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, txt_id, cantidad, codigo, result, txt, txt2, _id, err_13, err_14;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 5, 6, 11]);
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(req.body.id_u, "alie-sell")];
+                    case 1:
+                        txt_id = _a.sent();
+                        cantidad = req.body.cantidad;
+                        codigo = req.body.codigo;
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 2:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("BEGIN\n              SELECT id_carrito INTO :id_c FROM carrito WHERE id_usuario = :id_u and ROWNUM = 1;\n            END;", {
+                                id_u: txt_id._id,
+                                id_c: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 40 },
+                            })];
+                    case 3:
+                        result = _a.sent();
+                        txt = result;
+                        txt2 = txt.outBinds;
+                        _id = txt2.id_c;
+                        return [4 /*yield*/, connection.execute('insert into carrito_producto values(:id_c,:codigo,:cantidad)', { id_c: _id, codigo: codigo, cantidad: cantidad }, { autoCommit: true })];
+                    case 4:
+                        _a.sent();
+                        res.status(200).send({ message: 'producto agregado al carrito.' });
+                        return [3 /*break*/, 11];
+                    case 5:
+                        err_13 = _a.sent();
+                        console.error(err_13);
+                        res.status(409).send({ message: 'Problema al agregar a carrito.' });
+                        return [3 /*break*/, 11];
+                    case 6:
+                        if (!connection) return [3 /*break*/, 10];
+                        _a.label = 7;
+                    case 7:
+                        _a.trys.push([7, 9, , 10]);
+                        return [4 /*yield*/, connection.close()];
+                    case 8:
+                        _a.sent();
+                        return [3 /*break*/, 10];
+                    case 9:
+                        err_14 = _a.sent();
+                        console.error(err_14);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 10];
+                    case 10: return [7 /*endfinally*/];
+                    case 11: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ProductosController.prototype.getCarrito = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, id, txt_id, result, txt, txt2, _id, result2, err_15, err_16;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 5, 6, 11]);
+                        id = req.params.id;
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, "alie-sell")];
+                    case 1:
+                        txt_id = _a.sent();
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 2:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("BEGIN\n              SELECT id_carrito INTO :id_c FROM carrito WHERE id_usuario = :id_u and ROWNUM = 1;\n            END;", {
+                                id_u: txt_id._id,
+                                id_c: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 40 },
+                            })];
+                    case 3:
+                        result = _a.sent();
+                        txt = result;
+                        txt2 = txt.outBinds;
+                        _id = txt2.id_c;
+                        return [4 /*yield*/, connection.execute("select p.codigo,p.nombre,p.descripcion,p.precio,c.cantidad,c.cantidad*p.precio as subtotal\n          from producto p,carrito_producto c\n          where id_carrito=:carrito and c.codigo=p.codigo", { carrito: _id })];
+                    case 4:
+                        result2 = _a.sent();
+                        res.status(200).send(result2.rows);
+                        return [3 /*break*/, 11];
+                    case 5:
+                        err_15 = _a.sent();
+                        console.error(err_15);
+                        res.status(409).send({ message: 'Problema al obtener el carrito.' });
+                        return [3 /*break*/, 11];
+                    case 6:
+                        if (!connection) return [3 /*break*/, 10];
+                        _a.label = 7;
+                    case 7:
+                        _a.trys.push([7, 9, , 10]);
+                        return [4 /*yield*/, connection.close()];
+                    case 8:
+                        _a.sent();
+                        return [3 /*break*/, 10];
+                    case 9:
+                        err_16 = _a.sent();
+                        console.error(err_16);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 10];
+                    case 10: return [7 /*endfinally*/];
+                    case 11: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ProductosController.prototype.comprar = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                console.log(req.body);
+                res.status(200).send({ message: 'Se completo la compra.' });
+                return [2 /*return*/];
+            });
+        });
+    };
     return ProductosController;
 }());
 exports.productosController = new ProductosController();

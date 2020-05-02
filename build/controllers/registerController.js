@@ -54,42 +54,125 @@ var RegisterController = /** @class */ (function () {
     }
     RegisterController.prototype.create = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, salt, hash, result, txt, txt2, _id, expiresIn, accessToken, dataU, link, TXTUSER, TXTCLAVE, transporter, mail_options, err_1, err_2;
+            function getRandomCredit(min, max) {
+                var n = Math.floor(Math.random() * (max - min)) + min;
+                var res;
+                switch (n) {
+                    case 1:
+                        res = 50000.00;
+                        break;
+                    case 2:
+                        res = 25000.00;
+                        break;
+                    case 3:
+                        res = 10000.00;
+                        break;
+                    case 4:
+                        res = 5000.00;
+                        break;
+                    default:
+                        res = 1000.00;
+                }
+                return res;
+            }
+            var connection, salt, hash, credito, fechaArreglada, result, txt, txt2, _id, expiresIn, accessToken, dataU, link, TXTUSER, TXTCLAVE, transporter, mail_options, err_1, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         salt = bcryptjs_1.default.genSaltSync(10);
                         hash = bcryptjs_1.default.hashSync(req.body.clave, salt);
                         req.body.clave = hash;
+                        credito = getRandomCredit(1, 5);
+                        req.body.credito = credito;
+                        req.body.ganancia = 0.00;
+                        req.body.estado = 1;
+                        fechaArreglada = function (fecha) {
+                            var separador = fecha.split(" ");
+                            var year = separador[3];
+                            var mes = separador[1];
+                            var dia = separador[2];
+                            var numMes;
+                            switch (mes) {
+                                case "Jan":
+                                    numMes = 1;
+                                    break;
+                                case "Feb":
+                                    numMes = 2;
+                                    break;
+                                case "Mar":
+                                    numMes = 3;
+                                    break;
+                                case "Apr":
+                                    numMes = 4;
+                                    break;
+                                case "May":
+                                    numMes = 5;
+                                    break;
+                                case "Jun":
+                                    numMes = 6;
+                                    break;
+                                case "Jul":
+                                    numMes = 7;
+                                    break;
+                                case "Aug":
+                                    numMes = 8;
+                                    break;
+                                case "Sep":
+                                    numMes = 9;
+                                    break;
+                                case "Oct":
+                                    numMes = 10;
+                                    break;
+                                case "Nov":
+                                    numMes = 11;
+                                    break;
+                                case "Dec":
+                                    numMes = 12;
+                                    break;
+                                default:
+                                    numMes = 1;
+                            }
+                            var fechaArreglada = dia + "-" + numMes + "-" + year;
+                            return fechaArreglada;
+                        };
+                        req.body.fecha_reg = fechaArreglada(new Date().toDateString());
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 6, 7, 12]);
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 2:
+                        // console.log(req.body);   
                         connection = _a.sent();
-                        /*
-                        await connection.execute('insert into cliente values(:idbv, :cbv)',
-                        { idbv: 1001, cbv: 'jose ortega' } );
-                        await connection.execute('commit');*/
-                        console.log(req.body);
-                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,genero,direccion) '
-                                + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,'
-                                + ':genero,:direccion)', req.body)];
+                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,fecha_reg,genero,direccion,credito,ganancia,estado) '
+                                + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,:fecha_reg,'
+                                + ':genero,:direccion,:credito,:ganancia,:estado)', req.body, { autoCommit: true })];
                     case 3:
                         _a.sent();
-                        return [4 /*yield*/, connection.execute('commit')];
-                    case 4:
-                        _a.sent();
-                        return [4 /*yield*/, connection.execute("BEGIN\n              SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;\n            END;", {
+                        return [4 /*yield*/, connection.execute("BEGIN\n              SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo and ROWNUM = 1;\n            END;", {
                                 correo: req.body.correo,
                                 id_u: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 40 },
                             })];
-                    case 5:
+                    case 4:
                         result = _a.sent();
                         txt = result;
                         txt2 = txt.outBinds;
                         _id = txt2.id_u;
                         expiresIn = 24 * 60 * 60;
+                        //const accessToken = jwt.sign({nombre:req.body.id_usuario},'alie-sell',{expiresIn:expiresIn});
+                        /* const dataU={
+                          correo:req.body.correo,
+                          accessToken:accessToken,
+                          expireIns:expiresIn
+                        } */
+                        return [4 /*yield*/, connection.execute('insert into carrito values(pk_carrito.nextval,:id)', { id: _id }, { autoCommit: true })];
+                    case 5:
+                        //const accessToken = jwt.sign({nombre:req.body.id_usuario},'alie-sell',{expiresIn:expiresIn});
+                        /* const dataU={
+                          correo:req.body.correo,
+                          accessToken:accessToken,
+                          expireIns:expiresIn
+                        } */
+                        _a.sent();
                         accessToken = jsonwebtoken_1.default.sign({ _id: _id }, 'alie-sell');
                         dataU = {
                             correo: req.body.correo,

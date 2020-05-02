@@ -323,6 +323,92 @@ let producto= {
         }
       }
     }
+
+    async agregarCarrito(req: Request, res: Response){
+      let connection;
+      try {
+        const txt_id: any = await jwt.verify(req.body.id_u, "alie-sell");
+        const cantidad=req.body.cantidad;
+        const codigo = req.body.codigo;
+        connection = await oracledb.getConnection(conexion); 
+        const result = await connection.execute(
+          `BEGIN
+              SELECT id_carrito INTO :id_c FROM carrito WHERE id_usuario = :id_u and ROWNUM = 1;
+            END;`,
+          {   
+            id_u:   txt_id._id,
+            id_c: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 40 },
+          }
+        );
+        const txt:any=result;
+        const txt2:any=txt.outBinds;
+        const _id:any=txt2.id_c;
+        await connection.execute('insert into carrito_producto values(:id_c,:codigo,:cantidad)',{id_c:_id,codigo:codigo,cantidad:cantidad},
+        { autoCommit: true });    
+
+        res.status(200).send({message:'producto agregado al carrito.'})
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al agregar a carrito.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async getCarrito(req: Request, res: Response){
+      let connection;
+      try {
+        const { id }: any = req.params;
+        const txt_id: any = await jwt.verify(id, "alie-sell");
+        connection = await oracledb.getConnection(conexion); 
+        const result = await connection.execute(
+          `BEGIN
+              SELECT id_carrito INTO :id_c FROM carrito WHERE id_usuario = :id_u and ROWNUM = 1;
+            END;`,
+          {   
+            id_u:   txt_id._id,
+            id_c: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 40 },
+          }
+        );
+        const txt:any=result;
+        const txt2:any=txt.outBinds;
+        const _id:any=txt2.id_c;
+          
+        const result2 = await connection.execute(
+          `select p.codigo,p.nombre,p.descripcion,p.precio,c.cantidad,c.cantidad*p.precio as subtotal
+          from producto p,carrito_producto c
+          where id_carrito=:carrito and c.codigo=p.codigo`,
+          { carrito: _id }
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el carrito.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async comprar(req: Request, res: Response){
+      console.log(req.body)
+      res.status(200).send({message:'Se completo la compra.'});
+    }
   }
 
 export const productosController=new ProductosController();
