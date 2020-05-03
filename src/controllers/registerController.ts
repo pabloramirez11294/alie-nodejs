@@ -99,9 +99,9 @@ class RegisterController{
       try {
        // console.log(req.body);   
         connection = await oracledb.getConnection(conexion);             
-        await connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,fecha_reg,genero,direccion,credito,ganancia,estado) '
+        await connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,fecha_reg,genero,direccion,clase,credito,ganancia,estado) '
                               + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,:fecha_reg,'
-                              + ':genero,:direccion,:credito,:ganancia,:estado)',req.body,{ autoCommit: true });
+                              + ':genero,:direccion,\'cliente\',:credito,:ganancia,:estado)',req.body,{ autoCommit: true });
 
         const result = await connection.execute(
           `BEGIN
@@ -215,12 +215,14 @@ class RegisterController{
                SELECT clave INTO :clave FROM usuario WHERE correo = :correo;
                SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;
                SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;
+               SELECT clase INTO :clase FROM usuario WHERE correo = :correo;
              END;`,
             {  // bind variables
               correo:   userData.correo,
               clave: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 100 },
               id_u: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 20 },
-              conf: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 1 }
+              conf: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 1 },
+              clase:{ dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 20 }
             }
           );
                 
@@ -229,6 +231,7 @@ class RegisterController{
                 const txt2:any=txt.outBinds;
                 const txt3:string=txt2.clave;
                 const _id:any=txt2.id_u;
+                const clase=txt2.clase;
                 //const fila:any=JSON.stringify(result.outBinds);
                 if(txt2.conf==0){
                   res.status(409).send({ message: 'Correo no autenticado.' });
@@ -243,7 +246,8 @@ class RegisterController{
                   const dataU={
                     name:req.body.name,
                     correo:req.body.correo,
-                    accessToken:accessToken
+                    accessToken:accessToken,
+                    clase:clase
                  }
                   res.status(200).send({ dataU });
                 } else {

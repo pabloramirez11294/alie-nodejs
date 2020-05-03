@@ -406,8 +406,70 @@ let producto= {
     }
 
     async comprar(req: Request, res: Response){
-      console.log(req.body)
-      res.status(200).send({message:'Se completo la compra.'});
+      let connection;
+      try {
+        const { id_comprador }: any = req.body;
+        const { total }: any = req.body;
+        const txt_id: any = await jwt.verify(id_comprador, "alie-sell");
+        const codigos:any=req.body.codigos;
+        const subtotales:any=req.body.subtotales;
+        const cantidades:any=req.body.cantidades;
+        connection = await oracledb.getConnection(conexion); 
+        const id_u:number=Number.parseInt(txt_id._id);
+        
+        await connection.execute(
+          `update usuario
+          set credito=(select credito-:total from usuario where id_usuario = :id_u and ROWNUM=1)
+          where id_usuario = :id_u `,
+          {
+            id_u:id_u,
+            total:total
+          }
+        );
+
+        for(let i=0;i<codigos.length;i++){
+          const codigo =codigos[i];
+          const subtotal=subtotales[i];
+          const cantidad=cantidades[i];
+          await connection.execute(
+            `update producto 
+            set cantidad=(select cantidad-:cantidad from producto where codigo=:codigo)
+            where codigo=:codigo`,
+            {
+              codigo:codigo,
+              cantidad:cantidad
+            },{ autoCommit: true }
+          );
+          await connection.execute(
+            `update usuario
+            set ganancia=(select ganancia+:subtotal from usuario where id_usuario=(select id_usuario from producto where codigo=:codigo and rownum=1) and ROWNUM=1)
+            where id_usuario=(select id_usuario from producto where codigo=:codigo and rownum=1)`,
+            {
+              codigo:codigo,
+              subtotal:subtotal
+            },{ autoCommit: true }
+          );
+        }
+        await connection.execute(
+          `truncate table carrito_producto`);
+
+        res.status(200).send({message:'Se completo la compra.'});
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al compra.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+      
+      
     }
   }
 

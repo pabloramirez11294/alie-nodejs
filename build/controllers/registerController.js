@@ -143,9 +143,9 @@ var RegisterController = /** @class */ (function () {
                     case 2:
                         // console.log(req.body);   
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,fecha_reg,genero,direccion,credito,ganancia,estado) '
+                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,apellidos,clave,correo,telefono,fecha_nac,fecha_reg,genero,direccion,clase,credito,ganancia,estado) '
                                 + 'values(pk_usuario.nextval, :nombre,:apellidos,:clave,:correo,:telefono,:fecha_nac,:fecha_reg,'
-                                + ':genero,:direccion,:credito,:ganancia,:estado)', req.body, { autoCommit: true })];
+                                + ':genero,:direccion,\'cliente\',:credito,:ganancia,:estado)', req.body, { autoCommit: true })];
                     case 3:
                         _a.sent();
                         return [4 /*yield*/, connection.execute("BEGIN\n              SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo and ROWNUM = 1;\n            END;", {
@@ -233,7 +233,7 @@ var RegisterController = /** @class */ (function () {
     };
     RegisterController.prototype.loginUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, userData, result, txt, txt2, txt3, _id, resultPassword, accessToken, dataU, err_3, err_4;
+            var connection, userData, result, txt, txt2, txt3, _id, clase, resultPassword, accessToken, dataU, err_3, err_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -247,11 +247,12 @@ var RegisterController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 2:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("BEGIN\n               SELECT clave INTO :clave FROM usuario WHERE correo = :correo;\n               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;\n               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;\n             END;", {
+                        return [4 /*yield*/, connection.execute("BEGIN\n               SELECT clave INTO :clave FROM usuario WHERE correo = :correo;\n               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;\n               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;\n               SELECT clase INTO :clase FROM usuario WHERE correo = :correo;\n             END;", {
                                 correo: userData.correo,
                                 clave: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.STRING, maxSize: 100 },
                                 id_u: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 20 },
-                                conf: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 1 }
+                                conf: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 1 },
+                                clase: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.STRING, maxSize: 20 }
                             })];
                     case 3:
                         result = _a.sent();
@@ -259,6 +260,7 @@ var RegisterController = /** @class */ (function () {
                         txt2 = txt.outBinds;
                         txt3 = txt2.clave;
                         _id = txt2.id_u;
+                        clase = txt2.clase;
                         //const fila:any=JSON.stringify(result.outBinds);
                         if (txt2.conf == 0) {
                             res.status(409).send({ message: 'Correo no autenticado.' });
@@ -270,7 +272,8 @@ var RegisterController = /** @class */ (function () {
                             dataU = {
                                 name: req.body.name,
                                 correo: req.body.correo,
-                                accessToken: accessToken
+                                accessToken: accessToken,
+                                clase: clase
                             };
                             res.status(200).send({ dataU: dataU });
                         }
