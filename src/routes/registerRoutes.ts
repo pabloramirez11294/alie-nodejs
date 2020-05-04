@@ -9,10 +9,11 @@ class RegisterRoutes {
     }
 
     config() {
-        this.router.get('/listar', registerController.run);       
+        this.router.get('/listar', registerController.getUsuarios);       
         this.router.post('/crear', registerController.create);
         this.router.post('/login', registerController.loginUser);
         this.router.get('/confirmar/:id', registerController.confirmarCorreo);
+        this.router.put('/adminActualizar', registerController.adminActualizar);
         //this.router.get('/enviar', registerController.enviarCorreo);
     }
 

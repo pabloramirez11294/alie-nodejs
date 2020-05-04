@@ -8,10 +8,11 @@ var RegisterRoutes = /** @class */ (function () {
         this.config();
     }
     RegisterRoutes.prototype.config = function () {
-        this.router.get('/listar', registerController_1.registerController.run);
+        this.router.get('/listar', registerController_1.registerController.getUsuarios);
         this.router.post('/crear', registerController_1.registerController.create);
         this.router.post('/login', registerController_1.registerController.loginUser);
         this.router.get('/confirmar/:id', registerController_1.registerController.confirmarCorreo);
+        this.router.put('/adminActualizar', registerController_1.registerController.adminActualizar);
         //this.router.get('/enviar', registerController.enviarCorreo);
     };
     return RegisterRoutes;

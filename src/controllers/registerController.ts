@@ -213,7 +213,7 @@ class RegisterController{
           const result = await connection.execute(
             `BEGIN
                SELECT clave INTO :clave FROM usuario WHERE correo = :correo;
-               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;
+               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;
                SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;
                SELECT clase INTO :clase FROM usuario WHERE correo = :correo;
              END;`,
@@ -327,7 +327,7 @@ class RegisterController{
       }
     }
     
-    async run(req:Request,res:Response) {
+    async getUsuarios(req:Request,res:Response) {
         
       let connection;
       
@@ -355,6 +355,34 @@ class RegisterController{
       }
     }
     
+    public async adminActualizar(req:Request,res:Response){
+      let connection;
+      try {
+        connection = await oracledb.getConnection(conexion);
+
+        console.log(req.body);
+
+        await connection.execute(
+          "update usuario set clase=:clase, estado=:estado where id_usuario=:id_usuario",
+          req.body
+        );
+        await connection.execute("commit");
+
+        res.status(200).send({ message: "Se actualizo el usuario." });
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: "Problema adminActualizar." });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: "Error al cerrar la conexión." });
+          }
+        }
+      }
+    }
    
 }
 

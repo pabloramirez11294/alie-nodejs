@@ -247,7 +247,7 @@ var RegisterController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 2:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("BEGIN\n               SELECT clave INTO :clave FROM usuario WHERE correo = :correo;\n               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo;\n               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;\n               SELECT clase INTO :clase FROM usuario WHERE correo = :correo;\n             END;", {
+                        return [4 /*yield*/, connection.execute("BEGIN\n               SELECT clave INTO :clave FROM usuario WHERE correo = :correo;\n               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;\n               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;\n               SELECT clase INTO :clase FROM usuario WHERE correo = :correo;\n             END;", {
                                 correo: userData.correo,
                                 clave: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.STRING, maxSize: 100 },
                                 id_u: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 20 },
@@ -371,7 +371,7 @@ var RegisterController = /** @class */ (function () {
             });
         });
     };
-    RegisterController.prototype.run = function (req, res) {
+    RegisterController.prototype.getUsuarios = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var connection, result, err_7, err_8;
             return __generator(this, function (_a) {
@@ -409,6 +409,50 @@ var RegisterController = /** @class */ (function () {
                         return [3 /*break*/, 8];
                     case 8: return [7 /*endfinally*/];
                     case 9: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RegisterController.prototype.adminActualizar = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, err_9, err_10;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 4, 5, 10]);
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 1:
+                        connection = _a.sent();
+                        console.log(req.body);
+                        return [4 /*yield*/, connection.execute("update usuario set clase=:clase, estado=:estado where id_usuario=:id_usuario", req.body)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, connection.execute("commit")];
+                    case 3:
+                        _a.sent();
+                        res.status(200).send({ message: "Se actualizo el usuario." });
+                        return [3 /*break*/, 10];
+                    case 4:
+                        err_9 = _a.sent();
+                        console.error(err_9);
+                        res.status(409).send({ message: "Problema adminActualizar." });
+                        return [3 /*break*/, 10];
+                    case 5:
+                        if (!connection) return [3 /*break*/, 9];
+                        _a.label = 6;
+                    case 6:
+                        _a.trys.push([6, 8, , 9]);
+                        return [4 /*yield*/, connection.close()];
+                    case 7:
+                        _a.sent();
+                        return [3 /*break*/, 9];
+                    case 8:
+                        err_10 = _a.sent();
+                        console.error(err_10);
+                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        return [3 /*break*/, 9];
+                    case 9: return [7 /*endfinally*/];
+                    case 10: return [2 /*return*/];
                 }
             });
         });
