@@ -13,6 +13,10 @@ var RegisterRoutes = /** @class */ (function () {
         this.router.post('/login', registerController_1.registerController.loginUser);
         this.router.get('/confirmar/:id', registerController_1.registerController.confirmarCorreo);
         this.router.put('/adminActualizar', registerController_1.registerController.adminActualizar);
+        this.router.post('/adminRegistro', registerController_1.registerController.adminRegistro);
+        this.router.get('/getBitacora/:id', registerController_1.registerController.getBitacora);
+        this.router.get('/getUsuario/:id', registerController_1.registerController.getUsuario);
+        this.router.put('/actualizarUsuario', registerController_1.registerController.actualizarUsuario);
         //this.router.get('/enviar', registerController.enviarCorreo);
     };
     return RegisterRoutes;

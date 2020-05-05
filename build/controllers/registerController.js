@@ -247,7 +247,7 @@ var RegisterController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 2:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("BEGIN\n               SELECT clave INTO :clave FROM usuario WHERE correo = :correo;\n               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;\n               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;\n               SELECT clase INTO :clase FROM usuario WHERE correo = :correo;\n             END;", {
+                        return [4 /*yield*/, connection.execute("BEGIN\n               SELECT clave INTO :clave FROM usuario WHERE correo = :correo AND estado=1;\n               SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;\n               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo AND estado=1;\n               SELECT clase INTO :clase FROM usuario WHERE correo = :correo AND estado=1;\n             END;", {
                                 correo: userData.correo,
                                 clave: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.STRING, maxSize: 100 },
                                 id_u: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 20 },
@@ -262,7 +262,7 @@ var RegisterController = /** @class */ (function () {
                         _id = txt2.id_u;
                         clase = txt2.clase;
                         //const fila:any=JSON.stringify(result.outBinds);
-                        if (txt2.conf == 0) {
+                        if (txt2.conf == null || txt2.conf == 0) {
                             res.status(409).send({ message: 'Correo no autenticado.' });
                             return [2 /*return*/];
                         }
@@ -415,27 +415,169 @@ var RegisterController = /** @class */ (function () {
     };
     RegisterController.prototype.adminActualizar = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, err_9, err_10;
+            var connection, id_operador, txt_id, txtEstado, err_9, err_10;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 4, 5, 10]);
-                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                        id_operador = req.body.id_operador;
+                        _a.label = 1;
                     case 1:
-                        connection = _a.sent();
-                        console.log(req.body);
-                        return [4 /*yield*/, connection.execute("update usuario set clase=:clase, estado=:estado where id_usuario=:id_usuario", req.body)];
+                        _a.trys.push([1, 6, 7, 12]);
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id_operador, 'alie-sell')];
                     case 2:
+                        txt_id = _a.sent();
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 3:
+                        connection = _a.sent();
+                        req.body.id_operador = txt_id._id;
+                        console.log(req.body);
+                        txtEstado = "";
+                        if (req.body.estado == 1) {
+                            txtEstado = 'alta';
+                        }
+                        else if (req.body.estado == 0) {
+                            txtEstado = 'congelar';
+                        }
+                        else {
+                            txtEstado = 'baja';
+                        }
+                        return [4 /*yield*/, connection.execute("BEGIN\n          update usuario set clase=:clase, estado=:estado where id_usuario=:id_usuario;\n          insertarBitacora(:id_operador,:id_usuario,concat(concat(:clase,' - '),'" + txtEstado + "'),:descripcion);\n        END;          \n        ", req.body)];
+                    case 4:
                         _a.sent();
                         return [4 /*yield*/, connection.execute("commit")];
-                    case 3:
+                    case 5:
                         _a.sent();
                         res.status(200).send({ message: "Se actualizo el usuario." });
-                        return [3 /*break*/, 10];
-                    case 4:
+                        return [3 /*break*/, 12];
+                    case 6:
                         err_9 = _a.sent();
                         console.error(err_9);
                         res.status(409).send({ message: "Problema adminActualizar." });
+                        return [3 /*break*/, 12];
+                    case 7:
+                        if (!connection) return [3 /*break*/, 11];
+                        _a.label = 8;
+                    case 8:
+                        _a.trys.push([8, 10, , 11]);
+                        return [4 /*yield*/, connection.close()];
+                    case 9:
+                        _a.sent();
+                        return [3 /*break*/, 11];
+                    case 10:
+                        err_10 = _a.sent();
+                        console.error(err_10);
+                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        return [3 /*break*/, 11];
+                    case 11: return [7 /*endfinally*/];
+                    case 12: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RegisterController.prototype.adminRegistro = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, claveLegible, salt, hash, fechaArreglada, TXTUSER, TXTCLAVE, transporter, mail_options, err_11, err_12;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        claveLegible = req.body.clave;
+                        salt = bcryptjs_1.default.genSaltSync(10);
+                        hash = bcryptjs_1.default.hashSync(req.body.clave, salt);
+                        req.body.clave = hash;
+                        req.body.estado = 1;
+                        fechaArreglada = function (fecha) {
+                            var separador = fecha.split(" ");
+                            var year = separador[3];
+                            var mes = separador[1];
+                            var dia = separador[2];
+                            var numMes;
+                            switch (mes) {
+                                case "Jan":
+                                    numMes = 1;
+                                    break;
+                                case "Feb":
+                                    numMes = 2;
+                                    break;
+                                case "Mar":
+                                    numMes = 3;
+                                    break;
+                                case "Apr":
+                                    numMes = 4;
+                                    break;
+                                case "May":
+                                    numMes = 5;
+                                    break;
+                                case "Jun":
+                                    numMes = 6;
+                                    break;
+                                case "Jul":
+                                    numMes = 7;
+                                    break;
+                                case "Aug":
+                                    numMes = 8;
+                                    break;
+                                case "Sep":
+                                    numMes = 9;
+                                    break;
+                                case "Oct":
+                                    numMes = 10;
+                                    break;
+                                case "Nov":
+                                    numMes = 11;
+                                    break;
+                                case "Dec":
+                                    numMes = 12;
+                                    break;
+                                default:
+                                    numMes = 1;
+                            }
+                            var fechaArreglada = dia + "-" + numMes + "-" + year;
+                            return fechaArreglada;
+                        };
+                        req.body.fecha_reg = fechaArreglada(new Date().toDateString());
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 4, 5, 10]);
+                        console.log(req.body);
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 2:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,clave,correo,fecha_reg,genero,clase,estado,confirmacion) '
+                                + 'values(pk_usuario.nextval, :nombre,:clave,:correo,:fecha_reg,'
+                                + ':genero,:clase,:estado,1)', req.body, { autoCommit: true })];
+                    case 3:
+                        _a.sent();
+                        TXTUSER = process.env.MAILUSER;
+                        TXTCLAVE = process.env.MAILPASSWD;
+                        transporter = nodemailer_1.default.createTransport({
+                            service: 'gmail',
+                            auth: {
+                                user: TXTUSER,
+                                pass: TXTCLAVE
+                            }
+                        });
+                        mail_options = {
+                            from: TXTUSER,
+                            to: req.body.correo,
+                            subject: "Bienvenido ",
+                            html: "\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600px\" background-color=\"#96F726\" bgcolor=\"#cddf89\">\n              <tr height=\"150px\">  \n                  <td width=\"750px\">\n                      <h1 style=\"color: #0000FF; text-align:center\">Bienvenido a Alie Sell</h1>\n                      <p  style=\"color: #0000FF; text-align:center\">\n                          <span style=\"color: #FF0000\">" + req.body.correo + "</span>                           \n                      </p>\n                  </td>\n              </tr>\n              <tr bgcolor=\"#EB5E27\">\n                  <td style=\"text-align:center\">\n                      <p style=\"color: #FDFCFC\">Clave acceso:" + claveLegible + " </p>\n                  </td>\n              </tr>\n              </table>          \n          "
+                        };
+                        transporter.sendMail(mail_options, function (error, info) {
+                            if (error) {
+                                console.log(error);
+                                res.status(409).send({ message: 'Error al mandar el correo.' });
+                            }
+                            else {
+                                console.log('El correo se envío correctamente ' + info.response);
+                            }
+                        });
+                        //*********************************TERMINA CORREO */
+                        res.status(200).send({ message: 'Registrado' });
+                        return [3 /*break*/, 10];
+                    case 4:
+                        err_11 = _a.sent();
+                        console.error(err_11);
+                        res.status(409).send({ message: 'Problema al registrarse.' });
                         return [3 /*break*/, 10];
                     case 5:
                         if (!connection) return [3 /*break*/, 9];
@@ -447,12 +589,165 @@ var RegisterController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 9];
                     case 8:
-                        err_10 = _a.sent();
-                        console.error(err_10);
-                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        err_12 = _a.sent();
+                        console.error(err_12);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 9];
                     case 9: return [7 /*endfinally*/];
                     case 10: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RegisterController.prototype.getBitacora = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, id, txt_id, result, err_13, err_14;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.params.id;
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 5, 6, 11]);
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, 'alie-sell')];
+                    case 2:
+                        txt_id = _a.sent();
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 3:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("SELECT * FROM bitacora where id_operador=:valId", {
+                                valId: txt_id._id
+                            })];
+                    case 4:
+                        result = _a.sent();
+                        res.json(result.rows);
+                        return [3 /*break*/, 11];
+                    case 5:
+                        err_13 = _a.sent();
+                        console.error(err_13);
+                        res.status(409).send({ message: 'Problema al listar bitacora.' });
+                        return [3 /*break*/, 11];
+                    case 6:
+                        if (!connection) return [3 /*break*/, 10];
+                        _a.label = 7;
+                    case 7:
+                        _a.trys.push([7, 9, , 10]);
+                        return [4 /*yield*/, connection.close()];
+                    case 8:
+                        _a.sent();
+                        return [3 /*break*/, 10];
+                    case 9:
+                        err_14 = _a.sent();
+                        console.error(err_14);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 10];
+                    case 10: return [7 /*endfinally*/];
+                    case 11: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RegisterController.prototype.getUsuario = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, id, txt_id, result, err_15, err_16;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.params.id;
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 5, 6, 11]);
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, 'alie-sell')];
+                    case 2:
+                        txt_id = _a.sent();
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 3:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("SELECT * FROM usuario where id_usuario=:valId AND estado=1 AND ROWNUM=1", {
+                                valId: txt_id._id
+                            })];
+                    case 4:
+                        result = _a.sent();
+                        res.json(result.rows);
+                        return [3 /*break*/, 11];
+                    case 5:
+                        err_15 = _a.sent();
+                        console.error(err_15);
+                        res.status(409).send({ message: 'Problema abtener usuario.' });
+                        return [3 /*break*/, 11];
+                    case 6:
+                        if (!connection) return [3 /*break*/, 10];
+                        _a.label = 7;
+                    case 7:
+                        _a.trys.push([7, 9, , 10]);
+                        return [4 /*yield*/, connection.close()];
+                    case 8:
+                        _a.sent();
+                        return [3 /*break*/, 10];
+                    case 9:
+                        err_16 = _a.sent();
+                        console.error(err_16);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 10];
+                    case 10: return [7 /*endfinally*/];
+                    case 11: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    RegisterController.prototype.actualizarUsuario = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, id, salt, hash, txt_id, err_17, err_18;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.body.id_usuario;
+                        console.log(req.body);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 6, 7, 12]);
+                        if (req.body.clave.length < 30) {
+                            salt = bcryptjs_1.default.genSaltSync(10);
+                            hash = bcryptjs_1.default.hashSync(req.body.clave, salt);
+                            req.body.clave = hash;
+                        }
+                        return [4 /*yield*/, jsonwebtoken_1.default.verify(id, 'alie-sell')];
+                    case 2:
+                        txt_id = _a.sent();
+                        req.body.id_usuario = txt_id._id;
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 3:
+                        connection = _a.sent();
+                        console.log(req.body);
+                        return [4 /*yield*/, connection.execute("UPDATE usuario set nombre=:nombre, apellidos=:apellidos,\n                      correo=:correo, clave=:clave, telefono=:telefono \n                      WHERE id_usuario=:id_usuario", req.body)];
+                    case 4:
+                        _a.sent();
+                        return [4 /*yield*/, connection.execute("commit")];
+                    case 5:
+                        _a.sent();
+                        res.status(200).send({ message: 'Se actualizaron sus datos.' });
+                        return [3 /*break*/, 12];
+                    case 6:
+                        err_17 = _a.sent();
+                        console.error(err_17);
+                        res.status(409).send({ message: 'Problema abtener usuario.' });
+                        return [3 /*break*/, 12];
+                    case 7:
+                        if (!connection) return [3 /*break*/, 11];
+                        _a.label = 8;
+                    case 8:
+                        _a.trys.push([8, 10, , 11]);
+                        return [4 /*yield*/, connection.close()];
+                    case 9:
+                        _a.sent();
+                        return [3 /*break*/, 11];
+                    case 10:
+                        err_18 = _a.sent();
+                        console.error(err_18);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 11];
+                    case 11: return [7 /*endfinally*/];
+                    case 12: return [2 /*return*/];
                 }
             });
         });

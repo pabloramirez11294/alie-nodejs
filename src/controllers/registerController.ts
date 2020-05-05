@@ -212,10 +212,10 @@ class RegisterController{
       
           const result = await connection.execute(
             `BEGIN
-               SELECT clave INTO :clave FROM usuario WHERE correo = :correo;
+               SELECT clave INTO :clave FROM usuario WHERE correo = :correo AND estado=1;
                SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;
-               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo;
-               SELECT clase INTO :clase FROM usuario WHERE correo = :correo;
+               SELECT confirmacion INTO :conf FROM usuario WHERE correo = :correo AND estado=1;
+               SELECT clase INTO :clase FROM usuario WHERE correo = :correo AND estado=1;
              END;`,
             {  // bind variables
               correo:   userData.correo,
@@ -233,7 +233,8 @@ class RegisterController{
                 const _id:any=txt2.id_u;
                 const clase=txt2.clase;
                 //const fila:any=JSON.stringify(result.outBinds);
-                if(txt2.conf==0){
+               
+                if(txt2.conf==null || txt2.conf==0){
                   res.status(409).send({ message: 'Correo no autenticado.' });
                   return;
                 }
@@ -357,13 +358,27 @@ class RegisterController{
     
     public async adminActualizar(req:Request,res:Response){
       let connection;
+      const {id_operador}=req.body;
       try {
+        const txt_id:any= await jwt.verify(id_operador,'alie-sell');
         connection = await oracledb.getConnection(conexion);
-
+        req.body.id_operador=txt_id._id;
         console.log(req.body);
+        let txtEstado:any="";
+        if(req.body.estado==1){
+          txtEstado='alta';
+        }else if(req.body.estado==0){
+          txtEstado='congelar';
+        }else{
+          txtEstado='baja';
+        }
 
         await connection.execute(
-          "update usuario set clase=:clase, estado=:estado where id_usuario=:id_usuario",
+        `BEGIN
+          update usuario set clase=:clase, estado=:estado where id_usuario=:id_usuario;
+          insertarBitacora(:id_operador,:id_usuario,concat(concat(:clase,' - '),'${txtEstado}'),:descripcion);
+        END;          
+        `,
           req.body
         );
         await connection.execute("commit");
@@ -384,6 +399,246 @@ class RegisterController{
       }
     }
    
+    public async adminRegistro(req: Request, res: Response) {
+      let connection;
+      const claveLegible=req.body.clave;
+      var salt = bcrypt.genSaltSync(10);
+      var hash = bcrypt.hashSync(req.body.clave, salt);
+      req.body.clave=hash;
+      req.body.estado=1;
+      const fechaArreglada = function (fecha: string): string {
+        let separador = fecha.split(" ");
+        let year = separador[3];
+        let mes = separador[1];
+        let dia = separador[2];
+        let numMes: number;
+        switch (mes) {
+          case "Jan":
+            numMes = 1;
+            break;
+          case "Feb":
+            numMes = 2;
+            break;
+          case "Mar":
+            numMes = 3;
+            break;
+          case "Apr":
+            numMes = 4;
+            break;
+          case "May":
+            numMes = 5;
+            break;
+          case "Jun":
+            numMes = 6;
+            break;
+          case "Jul":
+            numMes = 7;
+            break;
+          case "Aug":
+            numMes = 8;
+            break;
+          case "Sep":
+            numMes = 9;
+            break;
+          case "Oct":
+            numMes = 10;
+            break;
+          case "Nov":
+            numMes = 11;
+            break;
+          case "Dec":
+            numMes = 12;
+            break;
+          default:
+            numMes = 1;
+        }
+        let fechaArreglada = dia + "-" + numMes + "-" + year;
+        return fechaArreglada;
+      };
+      req.body.fecha_reg = fechaArreglada(
+        new Date().toDateString()
+      );
+      try {
+        console.log(req.body);   
+        connection = await oracledb.getConnection(conexion);             
+        await connection.execute('insert into usuario(id_usuario,nombre,clave,correo,fecha_reg,genero,clase,estado,confirmacion) '
+                              + 'values(pk_usuario.nextval, :nombre,:clave,:correo,:fecha_reg,'
+                              + ':genero,:clase,:estado,1)',req.body,{ autoCommit: true });
+
+       
+           
+        
+        //**********************CORREO ``
+        
+        const TXTUSER=process.env.MAILUSER;
+        const TXTCLAVE=process.env.MAILPASSWD;
+        
+        let transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+              user: TXTUSER,
+              pass: TXTCLAVE
+          }
+        });
+        let mail_options = {
+          from: TXTUSER,
+          to: req.body.correo,
+          subject: `Bienvenido `,
+          html: `
+              <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#96F726" bgcolor="#cddf89">
+              <tr height="150px">  
+                  <td width="750px">
+                      <h1 style="color: #0000FF; text-align:center">Bienvenido a Alie Sell</h1>
+                      <p  style="color: #0000FF; text-align:center">
+                          <span style="color: #FF0000">${req.body.correo}</span>                           
+                      </p>
+                  </td>
+              </tr>
+              <tr bgcolor="#EB5E27">
+                  <td style="text-align:center">
+                      <p style="color: #FDFCFC">Clave acceso:${claveLegible} </p>
+                  </td>
+              </tr>
+              </table>          
+          `
+          };
+          transporter.sendMail(mail_options, (error, info) => {
+            if (error) {
+                console.log(error);
+                res.status(409).send({ message: 'Error al mandar el correo.' });
+            } else {
+                console.log('El correo se envío correctamente ' + info.response);
+            }
+          });
+
+
+
+        //*********************************TERMINA CORREO */
+          
+
+      res.status(200).send({message:'Registrado'});
+
+           
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al registrarse.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+        
+    }
+
+    async getBitacora(req:Request,res:Response) {
+        
+      let connection;
+      const { id }=req.params;
+      try {
+        const txt_id:any= await jwt.verify(id,'alie-sell');
+        
+        connection = await oracledb.getConnection(conexion);
+    
+        const result = await connection.execute("SELECT * FROM bitacora where id_operador=:valId",
+        {  
+          valId: txt_id._id
+        });
+       res.json(result.rows);
+    
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al listar bitacora.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async getUsuario(req:Request,res:Response) {
+        
+      let connection;
+      const { id }=req.params;
+      try {
+        const txt_id:any= await jwt.verify(id,'alie-sell');
+        
+        connection = await oracledb.getConnection(conexion);
+    
+        const result = await connection.execute("SELECT * FROM usuario where id_usuario=:valId AND estado=1 AND ROWNUM=1",
+        {  
+          valId: txt_id._id
+        });
+       res.json(result.rows);
+    
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema abtener usuario.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async actualizarUsuario(req:Request,res:Response) {
+        
+      let connection;
+      const id=req.body.id_usuario; 
+      console.log(req.body)
+      try {
+        if(req.body.clave.length<30){
+          var salt = bcrypt.genSaltSync(10);
+          var hash = bcrypt.hashSync(req.body.clave, salt);
+          req.body.clave=hash;
+        }
+        
+        
+        const txt_id:any= await jwt.verify(id,'alie-sell');
+        req.body.id_usuario=txt_id._id;
+        connection = await oracledb.getConnection(conexion);
+        
+        console.log(req.body)
+        await connection.execute(`UPDATE usuario set nombre=:nombre, apellidos=:apellidos,
+                      correo=:correo, clave=:clave, telefono=:telefono 
+                      WHERE id_usuario=:id_usuario`,
+        req.body);
+        await connection.execute("commit");
+       res.status(200).send({message:'Se actualizaron sus datos.'});
+    
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema abtener usuario.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+
+
+
 }
 
 export const registerController=new RegisterController();
