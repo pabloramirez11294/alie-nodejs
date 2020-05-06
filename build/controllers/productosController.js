@@ -633,7 +633,9 @@ var ProductosController = /** @class */ (function () {
                     case 7:
                         i++;
                         return [3 /*break*/, 4];
-                    case 8: return [4 /*yield*/, connection.execute("truncate table carrito_producto")];
+                    case 8: return [4 /*yield*/, connection.execute("delete from CARRITO_PRODUCTO where id_carrito=(select c.id_carrito from carrito c where c.id_usuario=:id_usuario)", {
+                            id_usuario: id_u
+                        }, { autoCommit: true })];
                     case 9:
                         _a.sent();
                         res.status(200).send({ message: 'Se completo la compra.' });

@@ -17,6 +17,7 @@ var RegisterRoutes = /** @class */ (function () {
         this.router.get('/getBitacora/:id', registerController_1.registerController.getBitacora);
         this.router.get('/getUsuario/:id', registerController_1.registerController.getUsuario);
         this.router.put('/actualizarUsuario', registerController_1.registerController.actualizarUsuario);
+        this.router.put('/olvidoPass', registerController_1.registerController.olvidoPass);
         //this.router.get('/enviar', registerController.enviarCorreo);
     };
     return RegisterRoutes;

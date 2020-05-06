@@ -752,6 +752,91 @@ var RegisterController = /** @class */ (function () {
             });
         });
     };
+    RegisterController.prototype.olvidoPass = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, provisional, salt, hash, result, TXTUSER, TXTCLAVE, transporter, mail_options, txt, txt2, _id, err_19, err_20;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        console.log(req.body);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 5, 6, 11]);
+                        provisional = 'Pass123@';
+                        salt = bcryptjs_1.default.genSaltSync(10);
+                        hash = bcryptjs_1.default.hashSync(provisional, salt);
+                        req.body.clave = hash;
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 2:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("BEGIN\n             SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;             \n           END;", {
+                                correo: req.body.correo,
+                                id_u: { dir: oracledb_1.default.BIND_OUT, type: oracledb_1.default.NUMBER, maxSize: 20 },
+                            })];
+                    case 3:
+                        result = _a.sent();
+                        TXTUSER = process.env.MAILUSER;
+                        TXTCLAVE = process.env.MAILPASSWD;
+                        transporter = nodemailer_1.default.createTransport({
+                            service: 'gmail',
+                            auth: {
+                                user: TXTUSER,
+                                pass: TXTCLAVE
+                            }
+                        });
+                        mail_options = {
+                            from: TXTUSER,
+                            to: req.body.correo,
+                            subject: "Bienvenido ",
+                            html: "\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600px\" background-color=\"#96F726\" bgcolor=\"#cddf89\">\n              <tr height=\"150px\">  \n                  <td width=\"750px\">\n                      <h1 style=\"color: #0000FF; text-align:center\">Bienvenido a Alie Sell</h1>\n                      <p  style=\"color: #0000FF; text-align:center\">\n                          <span style=\"color: #FF0000\">" + req.body.correo + "</span>                           \n                      </p>\n                  </td>\n              </tr>\n              <tr bgcolor=\"#EB5E27\">\n                  <td style=\"text-align:center\">\n                      <p style=\"color: #FDFCFC\">Clave acceso provisional: " + provisional + " </p>\n                  </td>\n              </tr>\n              </table>          \n          "
+                        };
+                        transporter.sendMail(mail_options, function (error, info) {
+                            if (error) {
+                                console.log(error);
+                                //res.status(409).send({ message: 'Error al mandar el correo.' });
+                            }
+                            else {
+                                console.log('El correo se envío correctamente ' + info.response);
+                            }
+                        });
+                        txt = result;
+                        txt2 = txt.outBinds;
+                        _id = txt2.id_u;
+                        console.log(req.body, 'ssssssssssssssssssssss');
+                        return [4 /*yield*/, connection.execute("BEGIN\n                      UPDATE usuario set clave=:clave WHERE correo=:correo;\n                      commit;\n                      olvidoPass(:id_usuario,'$2a$10$1ZZ7iKzmHQx8pUN4KK8hmO6p6y6qBtRGHT1/WadgwQefmmaaUgp9e');\n                    END;    \n                      ", {
+                                clave: req.body.clave,
+                                correo: req.body.correo,
+                                id_usuario: _id
+                            })];
+                    case 4:
+                        _a.sent();
+                        res.status(200).send({ message: 'Revise su correo.' });
+                        return [3 /*break*/, 11];
+                    case 5:
+                        err_19 = _a.sent();
+                        console.error(err_19);
+                        res.status(409).send({ message: 'Problema recuperar contraseña.' });
+                        return [3 /*break*/, 11];
+                    case 6:
+                        if (!connection) return [3 /*break*/, 10];
+                        _a.label = 7;
+                    case 7:
+                        _a.trys.push([7, 9, , 10]);
+                        return [4 /*yield*/, connection.close()];
+                    case 8:
+                        _a.sent();
+                        return [3 /*break*/, 10];
+                    case 9:
+                        err_20 = _a.sent();
+                        console.error(err_20);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 10];
+                    case 10: return [7 /*endfinally*/];
+                    case 11: return [2 /*return*/];
+                }
+            });
+        });
+    };
     return RegisterController;
 }());
 exports.registerController = new RegisterController();

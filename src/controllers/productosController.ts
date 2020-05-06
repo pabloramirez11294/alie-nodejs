@@ -451,7 +451,10 @@ let producto= {
           );
         }
         await connection.execute(
-          `truncate table carrito_producto`);
+          `delete from CARRITO_PRODUCTO where id_carrito=(select c.id_carrito from carrito c where c.id_usuario=:id_usuario)`,
+          {
+            id_usuario:id_u
+          },{ autoCommit: true });
 
         res.status(200).send({message:'Se completo la compra.'});
       } catch (err) {

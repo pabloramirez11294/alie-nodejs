@@ -636,6 +636,110 @@ class RegisterController{
       }
     }
 
+    async olvidoPass(req:Request,res:Response){
+      let connection;
+      console.log(req.body)
+      try {
+        const provisional:string='Pass123@';
+        var salt = bcrypt.genSaltSync(10);
+        var hash = bcrypt.hashSync(provisional, salt);
+        req.body.clave=hash;       
+        
+        connection = await oracledb.getConnection(conexion);
+
+        const result = await connection.execute(
+          `BEGIN
+             SELECT id_usuario INTO :id_u FROM usuario WHERE correo = :correo AND estado=1;             
+           END;`,
+          {  // bind variables
+            correo:   req.body.correo,
+            id_u: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 20 },
+            
+          }
+        );
+          //**********************CORREO ``
+        
+        const TXTUSER=process.env.MAILUSER;
+        const TXTCLAVE=process.env.MAILPASSWD;
+        
+        let transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+              user: TXTUSER,
+              pass: TXTCLAVE
+          }
+        });
+        let mail_options = {
+          from: TXTUSER,
+          to: req.body.correo,
+          subject: `Bienvenido `,
+          html: `
+              <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#96F726" bgcolor="#cddf89">
+              <tr height="150px">  
+                  <td width="750px">
+                      <h1 style="color: #0000FF; text-align:center">Bienvenido a Alie Sell</h1>
+                      <p  style="color: #0000FF; text-align:center">
+                          <span style="color: #FF0000">${req.body.correo}</span>                           
+                      </p>
+                  </td>
+              </tr>
+              <tr bgcolor="#EB5E27">
+                  <td style="text-align:center">
+                      <p style="color: #FDFCFC">Clave acceso provisional: ${provisional} </p>
+                  </td>
+              </tr>
+              </table>          
+          `
+          };
+          transporter.sendMail(mail_options, (error, info) => {
+          if (error) {
+            console.log(error);
+            //res.status(409).send({ message: 'Error al mandar el correo.' });
+          }
+          else {
+            console.log('El correo se envío correctamente ' + info.response);
+          }
+        });
+
+
+
+        //*********************************TERMINA CORREO */     
+              
+        const txt:any=result;
+        const txt2:any=txt.outBinds;
+        const _id:any=txt2.id_u;
+        
+        console.log(req.body,'ssssssssssssssssssssss')
+        await connection.execute(
+                  `BEGIN
+                      UPDATE usuario set clave=:clave WHERE correo=:correo;
+                      commit;
+                      olvidoPass(:id_usuario,'$2a$10$1ZZ7iKzmHQx8pUN4KK8hmO6p6y6qBtRGHT1/WadgwQefmmaaUgp9e');
+                    END;    
+                      `,{
+                        clave:req.body.clave,
+                        correo:req.body.correo,
+                        id_usuario:_id
+                      });
+
+       
+       res.status(200).send({message:'Revise su correo.'});
+    
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema recuperar contraseña.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
 
 
 

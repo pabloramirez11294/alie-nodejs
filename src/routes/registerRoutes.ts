@@ -18,6 +18,7 @@ class RegisterRoutes {
         this.router.get('/getBitacora/:id', registerController.getBitacora);
         this.router.get('/getUsuario/:id', registerController.getUsuario);
         this.router.put('/actualizarUsuario', registerController.actualizarUsuario);
+        this.router.put('/olvidoPass', registerController.olvidoPass);
         //this.router.get('/enviar', registerController.enviarCorreo);
     }
 
