@@ -22,6 +22,12 @@ var ProductosRoutes = /** @class */ (function () {
         this.router.post('/agregarCarrito', productosController_1.productosController.agregarCarrito);
         this.router.get('/getCarrito/:id', productosController_1.productosController.getCarrito);
         this.router.put('/comprar', productosController_1.productosController.comprar);
+        this.router.get('/reporte3/:year', productosController_1.productosController.reporte3);
+        this.router.get('/reporte4', productosController_1.productosController.reporte4);
+        this.router.get('/reporte6', productosController_1.productosController.reporte6);
+        this.router.get('/reporte7', productosController_1.productosController.reporte7);
+        this.router.get('/reporte8', productosController_1.productosController.reporte8);
+        this.router.get('/reporte10/:cantidad', productosController_1.productosController.reporte10);
     };
     return ProductosRoutes;
 }());

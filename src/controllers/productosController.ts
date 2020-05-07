@@ -426,11 +426,35 @@ let producto= {
             total:total
           }
         );
+       const result =await connection.execute(
+          `BEGIN
+             insert into factura values(pk_factura.nextval,:id_u);
+             select id_factura into :id_factura FROM factura where id_usuario=:id_u and rownum=1 order by id_factura desc;
+          END;`,
+          {
+            id_u:id_u,
+            id_factura: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER, maxSize: 40 }
+          },{ autoCommit: true }
+        );
+        const txt:any=result;
+        const txt2:any=txt.outBinds;
+        const id_factura:any=txt2.id_factura;
 
         for(let i=0;i<codigos.length;i++){
           const codigo =codigos[i];
           const subtotal=subtotales[i];
           const cantidad=cantidades[i];
+
+          await connection.execute(
+            `insert into detalle values(:id_factura,:codigo,:cantidad,:subtotal) `,
+            {
+              id_factura:id_factura,
+              codigo:codigo,
+              cantidad:cantidad,
+              subtotal:subtotal
+            }
+          );
+
           await connection.execute(
             `update producto 
             set cantidad=(select cantidad-:cantidad from producto where codigo=:codigo)
@@ -473,6 +497,184 @@ let producto= {
       }
       
       
+    }
+
+    //year
+    async reporte3(req: Request, res: Response){
+      let connection;
+      try {
+        const {year}=req.params;
+        connection = await oracledb.getConnection(conexion); 
+        
+          
+        const result2 = await connection.execute(
+          `select  c.id_usuario,c.nombre,c.correo,c.fecha_nac from usuario c 
+          where genero=2 and clase='admin' and EXTRACT(YEAR FROM fecha_nac)<:year`,
+          { year: year }
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async reporte4(req: Request, res: Response){
+      let connection;
+      try {
+        connection = await oracledb.getConnection(conexion); 
+        
+          
+        const result2 = await connection.execute(
+          `select c.id_usuario,c.nombre,c.correo,c.ganancia
+          from usuario c
+          where clase='cliente'
+          order by c.ganancia desc`
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async reporte6(req: Request, res: Response){
+      let connection;
+      try {
+        connection = await oracledb.getConnection(conexion); 
+        
+          
+        const result2 = await connection.execute(
+          `select p.codigo,p.nombre, sum(d.cantidad) as total
+          from detalle d, producto p
+          where d.codigo=p.codigo 
+          group by p.codigo,p.nombre
+          order by total desc`
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async reporte7(req: Request, res: Response){
+      let connection;
+      try {
+        connection = await oracledb.getConnection(conexion); 
+        
+          
+        const result2 = await connection.execute(
+          `select u.id_usuario, u.nombre,  sum(p.cantidad) as cantidad
+          from usuario u,producto p
+          where u.id_usuario=p.id_usuario 
+          group by u.id_usuario, u.nombre
+          order by cantidad desc`
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    async reporte8(req: Request, res: Response){
+      let connection;
+      try {
+        connection = await oracledb.getConnection(conexion); 
+        
+          
+        const result2 = await connection.execute(
+          `select p.codigo,p.nombre,c.nombre 
+          from producto p, categoria c
+          where c.id_categoria=p.id_categoria`
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
+    }
+
+    //cantidad
+    async reporte10(req: Request, res: Response){
+      let connection;
+      try {
+        const {cantidad}=req.params;
+        connection = await oracledb.getConnection(conexion); 
+        
+          
+        const result2 = await connection.execute(
+          `select codigo, nombre
+          from producto
+          where cantidad=:cantidad`,
+          {cantidad:cantidad}
+        );
+        res.status(200).send(result2.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+            //res.send("cerrar conexion");
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: 'Error al cerrar la conexión.' });
+          }
+        }
+      }
     }
   }
 

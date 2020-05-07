@@ -22,6 +22,12 @@ class ProductosRoutes {
         this.router.get('/getCarrito/:id', productosController.getCarrito);  
         this.router.put('/comprar',productosController.comprar);
 
+        this.router.get('/reporte3/:year', productosController.reporte3); 
+        this.router.get('/reporte4', productosController.reporte4); 
+        this.router.get('/reporte6', productosController.reporte6); 
+        this.router.get('/reporte7', productosController.reporte7); 
+        this.router.get('/reporte8', productosController.reporte8); 
+        this.router.get('/reporte10/:cantidad', productosController.reporte10); 
     }
     
     

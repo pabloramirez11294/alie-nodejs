@@ -542,8 +542,8 @@ var RegisterController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 2:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,clave,correo,fecha_reg,genero,clase,estado,confirmacion) '
-                                + 'values(pk_usuario.nextval, :nombre,:clave,:correo,:fecha_reg,'
+                        return [4 /*yield*/, connection.execute('insert into usuario(id_usuario,nombre,clave,correo,fecha_nac,fecha_reg,genero,clase,estado,confirmacion) '
+                                + 'values(pk_usuario.nextval, :nombre,:clave,:correo,:fecha_nac,:fecha_reg,'
                                 + ':genero,:clase,:estado,1)', req.body, { autoCommit: true })];
                     case 3:
                         _a.sent();

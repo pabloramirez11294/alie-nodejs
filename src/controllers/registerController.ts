@@ -461,8 +461,8 @@ class RegisterController{
       try {
         console.log(req.body);   
         connection = await oracledb.getConnection(conexion);             
-        await connection.execute('insert into usuario(id_usuario,nombre,clave,correo,fecha_reg,genero,clase,estado,confirmacion) '
-                              + 'values(pk_usuario.nextval, :nombre,:clave,:correo,:fecha_reg,'
+        await connection.execute('insert into usuario(id_usuario,nombre,clave,correo,fecha_nac,fecha_reg,genero,clase,estado,confirmacion) '
+                              + 'values(pk_usuario.nextval, :nombre,:clave,:correo,:fecha_nac,:fecha_reg,'
                               + ':genero,:clase,:estado,1)',req.body,{ autoCommit: true });
 
        
