@@ -321,6 +321,46 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
+    ProductosController.prototype.buscarTodos = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, result, err_11, err_12;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, 4, 9]);
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 1:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("SELECT * FROM producto WHERE estado=1")];
+                    case 2:
+                        result = _a.sent();
+                        res.status(200).send(result.rows);
+                        return [3 /*break*/, 9];
+                    case 3:
+                        err_11 = _a.sent();
+                        console.error(err_11);
+                        res.status(409).send({ message: "Problema al buscar productos." });
+                        return [3 /*break*/, 9];
+                    case 4:
+                        if (!connection) return [3 /*break*/, 8];
+                        _a.label = 5;
+                    case 5:
+                        _a.trys.push([5, 7, , 8]);
+                        return [4 /*yield*/, connection.close()];
+                    case 6:
+                        _a.sent();
+                        return [3 /*break*/, 8];
+                    case 7:
+                        err_12 = _a.sent();
+                        console.error(err_12);
+                        res.status(409).send({ message: "Error al cerrar la conexión." });
+                        return [3 /*break*/, 8];
+                    case 8: return [7 /*endfinally*/];
+                    case 9: return [2 /*return*/];
+                }
+            });
+        });
+    };
     ProductosController.prototype.cargarImagen = function (req, res) {
         return res.status(200).json({
             message: "Imagen guardada.",
@@ -329,7 +369,7 @@ var ProductosController = /** @class */ (function () {
     };
     ProductosController.prototype.cargaMasiva = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, _a, texto, id_usuario, tuplas, txt_id, _i, tuplas_1, tupla, campos, fechaArreglada, txtCategoria, categorias, primero, _id, _b, categorias_2, cat, result, txt, txt2, err_11, err_12;
+            var connection, _a, texto, id_usuario, tuplas, txt_id, _i, tuplas_1, tupla, campos, fechaArreglada, txtCategoria, categorias, primero, _id, _b, categorias_2, cat, result, txt, txt2, err_13, err_14;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -454,8 +494,8 @@ var ProductosController = /** @class */ (function () {
                         res.status(200).send({ message: "Se guardo carga masiva." });
                         return [3 /*break*/, 21];
                     case 15:
-                        err_11 = _c.sent();
-                        console.error(err_11);
+                        err_13 = _c.sent();
+                        console.error(err_13);
                         res.status(409).send({ message: "Problema carga masiva." });
                         return [3 /*break*/, 21];
                     case 16:
@@ -468,8 +508,8 @@ var ProductosController = /** @class */ (function () {
                         _c.sent();
                         return [3 /*break*/, 20];
                     case 19:
-                        err_12 = _c.sent();
-                        console.error(err_12);
+                        err_14 = _c.sent();
+                        console.error(err_14);
                         res.status(409).send({ message: "Error al cerrar la conexión." });
                         return [3 /*break*/, 20];
                     case 20: return [7 /*endfinally*/];
@@ -480,7 +520,7 @@ var ProductosController = /** @class */ (function () {
     };
     ProductosController.prototype.agregarCarrito = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, txt_id, cantidad, codigo, result, txt, txt2, _id, err_13, err_14;
+            var connection, txt_id, cantidad, codigo, result, txt, txt2, _id, err_15, err_16;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -508,8 +548,8 @@ var ProductosController = /** @class */ (function () {
                         res.status(200).send({ message: 'producto agregado al carrito.' });
                         return [3 /*break*/, 11];
                     case 5:
-                        err_13 = _a.sent();
-                        console.error(err_13);
+                        err_15 = _a.sent();
+                        console.error(err_15);
                         res.status(409).send({ message: 'Problema al agregar a carrito.' });
                         return [3 /*break*/, 11];
                     case 6:
@@ -522,8 +562,8 @@ var ProductosController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 10];
                     case 9:
-                        err_14 = _a.sent();
-                        console.error(err_14);
+                        err_16 = _a.sent();
+                        console.error(err_16);
                         res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 10];
                     case 10: return [7 /*endfinally*/];
@@ -534,7 +574,7 @@ var ProductosController = /** @class */ (function () {
     };
     ProductosController.prototype.getCarrito = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, id, txt_id, result, txt, txt2, _id, result2, err_15, err_16;
+            var connection, id, txt_id, result, txt, txt2, _id, result2, err_17, err_18;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -561,8 +601,8 @@ var ProductosController = /** @class */ (function () {
                         res.status(200).send(result2.rows);
                         return [3 /*break*/, 11];
                     case 5:
-                        err_15 = _a.sent();
-                        console.error(err_15);
+                        err_17 = _a.sent();
+                        console.error(err_17);
                         res.status(409).send({ message: 'Problema al obtener el carrito.' });
                         return [3 /*break*/, 11];
                     case 6:
@@ -575,8 +615,8 @@ var ProductosController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 10];
                     case 9:
-                        err_16 = _a.sent();
-                        console.error(err_16);
+                        err_18 = _a.sent();
+                        console.error(err_18);
                         res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 10];
                     case 10: return [7 /*endfinally*/];
@@ -587,7 +627,7 @@ var ProductosController = /** @class */ (function () {
     };
     ProductosController.prototype.comprar = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, id_comprador, total, txt_id, codigos, subtotales, cantidades, id_u, result, txt, txt2, id_factura, i, codigo, subtotal, cantidad, err_17, err_18;
+            var connection, id_comprador, total, txt_id, codigos, subtotales, cantidades, id_u, result, txt, txt2, id_factura, i, codigo, subtotal, cantidad, err_19, err_20;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -658,8 +698,8 @@ var ProductosController = /** @class */ (function () {
                         res.status(200).send({ message: 'Se completo la compra.' });
                         return [3 /*break*/, 18];
                     case 12:
-                        err_17 = _a.sent();
-                        console.error(err_17);
+                        err_19 = _a.sent();
+                        console.error(err_19);
                         res.status(409).send({ message: 'Problema al compra.' });
                         return [3 /*break*/, 18];
                     case 13:
@@ -672,8 +712,8 @@ var ProductosController = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 17];
                     case 16:
-                        err_18 = _a.sent();
-                        console.error(err_18);
+                        err_20 = _a.sent();
+                        console.error(err_20);
                         res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 17];
                     case 17: return [7 /*endfinally*/];
@@ -685,7 +725,7 @@ var ProductosController = /** @class */ (function () {
     //year
     ProductosController.prototype.reporte3 = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, year, result2, err_19, err_20;
+            var connection, year, result2, err_21, err_22;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -695,46 +735,6 @@ var ProductosController = /** @class */ (function () {
                     case 1:
                         connection = _a.sent();
                         return [4 /*yield*/, connection.execute("select  c.id_usuario,c.nombre,c.correo,c.fecha_nac from usuario c \n          where genero=2 and clase='admin' and EXTRACT(YEAR FROM fecha_nac)<:year", { year: year })];
-                    case 2:
-                        result2 = _a.sent();
-                        res.status(200).send(result2.rows);
-                        return [3 /*break*/, 9];
-                    case 3:
-                        err_19 = _a.sent();
-                        console.error(err_19);
-                        res.status(409).send({ message: 'Problema al obtener el reporte.' });
-                        return [3 /*break*/, 9];
-                    case 4:
-                        if (!connection) return [3 /*break*/, 8];
-                        _a.label = 5;
-                    case 5:
-                        _a.trys.push([5, 7, , 8]);
-                        return [4 /*yield*/, connection.close()];
-                    case 6:
-                        _a.sent();
-                        return [3 /*break*/, 8];
-                    case 7:
-                        err_20 = _a.sent();
-                        console.error(err_20);
-                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
-                        return [3 /*break*/, 8];
-                    case 8: return [7 /*endfinally*/];
-                    case 9: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    ProductosController.prototype.reporte4 = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var connection, result2, err_21, err_22;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 3, 4, 9]);
-                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
-                    case 1:
-                        connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("select c.id_usuario,c.nombre,c.correo,c.ganancia\n          from usuario c\n          where clase='cliente'\n          order by c.ganancia desc")];
                     case 2:
                         result2 = _a.sent();
                         res.status(200).send(result2.rows);
@@ -764,7 +764,7 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
-    ProductosController.prototype.reporte6 = function (req, res) {
+    ProductosController.prototype.reporte4 = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var connection, result2, err_23, err_24;
             return __generator(this, function (_a) {
@@ -774,7 +774,7 @@ var ProductosController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 1:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("select p.codigo,p.nombre, sum(d.cantidad) as total\n          from detalle d, producto p\n          where d.codigo=p.codigo \n          group by p.codigo,p.nombre\n          order by total desc")];
+                        return [4 /*yield*/, connection.execute("select c.id_usuario,c.nombre,c.correo,c.ganancia\n          from usuario c\n          where clase='cliente'\n          order by c.ganancia desc")];
                     case 2:
                         result2 = _a.sent();
                         res.status(200).send(result2.rows);
@@ -804,7 +804,7 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
-    ProductosController.prototype.reporte7 = function (req, res) {
+    ProductosController.prototype.reporte6 = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var connection, result2, err_25, err_26;
             return __generator(this, function (_a) {
@@ -814,7 +814,7 @@ var ProductosController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 1:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("select u.id_usuario, u.nombre,  sum(p.cantidad) as cantidad\n          from usuario u,producto p\n          where u.id_usuario=p.id_usuario \n          group by u.id_usuario, u.nombre\n          order by cantidad desc")];
+                        return [4 /*yield*/, connection.execute("select p.codigo,p.nombre, sum(d.cantidad) as total\n          from detalle d, producto p\n          where d.codigo=p.codigo \n          group by p.codigo,p.nombre\n          order by total desc")];
                     case 2:
                         result2 = _a.sent();
                         res.status(200).send(result2.rows);
@@ -844,7 +844,7 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
-    ProductosController.prototype.reporte8 = function (req, res) {
+    ProductosController.prototype.reporte7 = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var connection, result2, err_27, err_28;
             return __generator(this, function (_a) {
@@ -854,7 +854,7 @@ var ProductosController = /** @class */ (function () {
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 1:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("select p.codigo,p.nombre,c.nombre \n          from producto p, categoria c\n          where c.id_categoria=p.id_categoria")];
+                        return [4 /*yield*/, connection.execute("select u.id_usuario, u.nombre,  sum(p.cantidad) as cantidad\n          from usuario u,producto p\n          where u.id_usuario=p.id_usuario \n          group by u.id_usuario, u.nombre\n          order by cantidad desc")];
                     case 2:
                         result2 = _a.sent();
                         res.status(200).send(result2.rows);
@@ -884,19 +884,17 @@ var ProductosController = /** @class */ (function () {
             });
         });
     };
-    //cantidad
-    ProductosController.prototype.reporte10 = function (req, res) {
+    ProductosController.prototype.reporte8 = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var connection, cantidad, result2, err_29, err_30;
+            var connection, result2, err_29, err_30;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, 4, 9]);
-                        cantidad = req.params.cantidad;
                         return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
                     case 1:
                         connection = _a.sent();
-                        return [4 /*yield*/, connection.execute("select codigo, nombre\n          from producto\n          where cantidad=:cantidad", { cantidad: cantidad })];
+                        return [4 /*yield*/, connection.execute("select p.codigo,p.nombre,c.nombre \n          from producto p, categoria c\n          where c.id_categoria=p.id_categoria")];
                     case 2:
                         result2 = _a.sent();
                         res.status(200).send(result2.rows);
@@ -918,6 +916,48 @@ var ProductosController = /** @class */ (function () {
                     case 7:
                         err_30 = _a.sent();
                         console.error(err_30);
+                        res.status(409).send({ message: 'Error al cerrar la conexión.' });
+                        return [3 /*break*/, 8];
+                    case 8: return [7 /*endfinally*/];
+                    case 9: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    //cantidad
+    ProductosController.prototype.reporte10 = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, cantidad, result2, err_31, err_32;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, 4, 9]);
+                        cantidad = req.params.cantidad;
+                        return [4 /*yield*/, oracledb_1.default.getConnection(conexion)];
+                    case 1:
+                        connection = _a.sent();
+                        return [4 /*yield*/, connection.execute("select codigo, nombre\n          from producto\n          where cantidad=:cantidad", { cantidad: cantidad })];
+                    case 2:
+                        result2 = _a.sent();
+                        res.status(200).send(result2.rows);
+                        return [3 /*break*/, 9];
+                    case 3:
+                        err_31 = _a.sent();
+                        console.error(err_31);
+                        res.status(409).send({ message: 'Problema al obtener el reporte.' });
+                        return [3 /*break*/, 9];
+                    case 4:
+                        if (!connection) return [3 /*break*/, 8];
+                        _a.label = 5;
+                    case 5:
+                        _a.trys.push([5, 7, , 8]);
+                        return [4 /*yield*/, connection.close()];
+                    case 6:
+                        _a.sent();
+                        return [3 /*break*/, 8];
+                    case 7:
+                        err_32 = _a.sent();
+                        console.error(err_32);
                         res.status(409).send({ message: 'Error al cerrar la conexión.' });
                         return [3 /*break*/, 8];
                     case 8: return [7 /*endfinally*/];

@@ -189,6 +189,29 @@ let producto= {
         }
       }
     }
+    public async buscarTodos(req: Request, res: Response) {
+      let connection;
+      try {
+        connection = await oracledb.getConnection(conexion);
+        const result = await connection.execute(
+          `SELECT * FROM producto WHERE estado=1`
+        );
+        res.status(200).send(result.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(409).send({ message: "Problema al buscar productos." });
+      } finally {
+        if (connection) {
+          try {
+            await connection.close();
+          } catch (err) {
+            console.error(err);
+            res.status(409).send({ message: "Error al cerrar la conexión." });
+          }
+        }
+      }
+    }
+    
 
     public cargarImagen(req: Request, res: Response) {
       return res.status(200).json({
